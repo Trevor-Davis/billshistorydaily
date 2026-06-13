@@ -1,4 +1,4 @@
-name: Daily Bills Update
+	name: Daily Bills Update
 
 on:
   # 2am ET = 7am UTC (accounts for ET = UTC-5 in winter, UTC-4 in summer)
@@ -17,16 +17,18 @@ on:
 jobs:
   fetch-and-deploy:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     permissions:
       contents: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '20'
           cache: 'npm'
