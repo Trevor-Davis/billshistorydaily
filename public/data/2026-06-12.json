@@ -1,16 +1,21 @@
 {
   "themes": [
-    "Jude Bowry rookie contract completed",
-    "Mandatory minicamp wrap-up and takeaways",
-    "Roster moves and injury designations",
-    "Bills' 2026 Super Bowl contender outlook"
+    "Jude Bowry rookie contract completion",
+    "Mandatory minicamp roster moves",
+    "New coaching staff early impressions",
+    "Super Bowl contender status debate"
   ],
-  "writeup": "The Buffalo Bills closed the book on their 2026 offseason program on June 12, capping it with the signing of fourth-round offensive tackle Jude Bowry — the final member of their draft class to ink a deal — as the franchise turns its attention fully toward training camp. With mandatory minicamp now in the rearview mirror, the spotlight shifted to evaluating a loaded and revamped roster operating under first-year head coach Joe Brady, whose new-look staff has energized Western New York heading into a critical season. Roster transactions continued to ripple post-minicamp, as RB Desmond Reid reverted to injured reserve and DB Dorian Strong was formally placed on the reserve/NFI list, trimming the 90-man roster ahead of the July break. Analysts across the league pegged the Bills as a top AFC contender, with NFL.com ranking Buffalo first among franchises most likely to claim their first Lombardi Trophy, buoyed by Josh Allen's elite play and a retooled defense under coordinator Jim Leonhard. Between underrated sleeper profiles, minicamp standouts like rookie edge rusher T.J. Parker, and a daunting 2026 schedule preview, Bills coverage on June 12 painted a picture of a team under genuine championship pressure.",
+  "writeup": "Friday, June 12 marked a tidy administrative milestone for Buffalo as the Bills officially signed fourth-round offensive tackle Jude Bowry to a four-year rookie deal, completing the signing of all 10 members of their 2026 draft class. The move came on the heels of the team wrapping up mandatory minicamp, where new head coach Joe Brady's revamped staff — featuring a new offensive coordinator, defensive coordinator, and special teams coach — got valuable reps in a contact-free but critically important setting. The Bills also made five roster moves as minicamp closed, including placing RB Desmond Reid on injured reserve, waiving WR Gabriel Benyard, and reverting DB Dorian Strong to the reserve/non-football injury list. Against that backdrop, national media weighed in on Buffalo's prospects under Brady, with ClutchPoints noting that 'a coaching change, a revamped roster, and heightened expectations have created an entirely new landscape in Western New York,' while SI ranked the Bills as the top Super Bowl contender among franchises still chasing their first Lombardi Trophy.",
   "articles": [
     {
       "title": "Bills Sign T Jude Bowry, Complete Draft Class Deals",
       "source": "Pro Football Rumors",
       "url": "https://www.profootballrumors.com/2026/06/bills-sign-t-jude-bowry-complete-draft-class-deals"
+    },
+    {
+      "title": "Bills Sign T Jude Bowry, Complete Draft Class Deals",
+      "source": "BVM Sports",
+      "url": "https://bvmsports.com/2026/06/12/bills-sign-t-jude-bowry-complete-draft-class-deals/"
     },
     {
       "title": "Bills End Lengthy Wait by Signing Last Unsigned Draft Pick",
@@ -19,23 +24,18 @@
     },
     {
       "title": "Bills get OL Jude Bowry under contract to complete draft class signings",
-      "source": "NBC Sports / Pro Football Talk",
+      "source": "NBC Sports",
       "url": "https://www.nbcsports.com/nfl/profootballtalk/rumor-mill/news/bills-get-ol-jude-bowry-under-contract-to-complete-draft-class-signings"
     },
     {
-      "title": "Bills Sign T Jude Bowry, Complete Draft Class Deals",
-      "source": "BVM Sports",
-      "url": "https://bvmsports.com/2026/06/12/bills-sign-t-jude-bowry-complete-draft-class-deals/"
+      "title": "Bills finish signing rookie draft class with Jude Bowry agreement",
+      "source": "Buffalo Down",
+      "url": "https://buffalowdown.com/bills-finish-signing-rookie-draft-class-with-jude-bowry-agreement-01kty4ckss8d"
     },
     {
-      "title": "Setting Expectations for 10 Bills Rookies After Mandatory Minicamp",
-      "source": "Sports Illustrated",
-      "url": "https://www.si.com/nfl/bills/onsi/draft-setting-expectations-for-10-bills-rookies-after-mandatory-minicamp"
-    },
-    {
-      "title": "Bills news: Observations as Buffalo concludes mandatory minicamp",
-      "source": "Yahoo Sports / Buffalo Rumblings",
-      "url": "https://sports.yahoo.com/articles/bills-news-observations-buffalo-concludes-153309133.html"
+      "title": "Buffalo Bills make 5 roster moves as 2026 minicamp ends",
+      "source": "BuffaloBills.com",
+      "url": "https://www.buffalobills.com/news/buffalo-bills-make-5-roster-moves-as-2026-minicamp-ends"
     },
     {
       "title": "NFL news roundup: Latest league updates from Friday, June 12",
@@ -43,14 +43,9 @@
       "url": "https://www.nfl.com/news/nfl-news-roundup-latest-league-updates-from-friday-june-12"
     },
     {
-      "title": "2 underrated Bills sleepers who could break out in 2026 NFL season",
-      "source": "ClutchPoints",
-      "url": "https://clutchpoints.com/nfl/buffalo-bills/underrated-bills-sleepers-could-break-out-2026-nfl-season"
-    },
-    {
-      "title": "Most likely to win first Super Bowl in 2026 NFL season? Ranking 12 teams that lack Lombardi Trophy",
-      "source": "NFL.com",
-      "url": "https://www.nfl.com/news/most-likely-to-win-first-super-bowl-in-2026-nfl-season-ranking-12-teams-that-lack-lombardi-trophy"
+      "title": "Bills news: Observations as Buffalo concludes mandatory minicamp",
+      "source": "Buffalo Rumblings",
+      "url": "https://www.buffalorumblings.com/buffalo-bills-news/135310/bills-news-observations-as-buffalo-concludes-mandatory-minicamp"
     }
   ]
 }
