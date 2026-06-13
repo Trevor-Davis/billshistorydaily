@@ -45,7 +45,7 @@ jobs:
           git pull --rebase origin main
           git add public/data/
           git diff --staged --quiet && echo "No new data to commit." || git commit -m "Daily update: $(date -u +%Y-%m-%d)"
-          git push
+          git push --force
 
       - name: Build React app
         run: npm run build
