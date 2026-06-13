@@ -42,6 +42,7 @@ jobs:
         run: |
           git config user.name "Bills Bot"
           git config user.email "bot@billshistorydaily.com"
+          git pull --rebase origin main
           git add public/data/
           git diff --staged --quiet && echo "No new data to commit." || git commit -m "Daily update: $(date -u +%Y-%m-%d)"
           git push
