@@ -1,12 +1,8 @@
-	name: Daily Bills Update
+name: Daily Bills Update
 
 on:
-  # 2am ET = 7am UTC (accounts for ET = UTC-5 in winter, UTC-4 in summer)
-  # Using 7am UTC covers both EST and EDT safely
   schedule:
-    - cron: '0 7 * * *'
-
-  # Also allow manual runs from the GitHub Actions tab
+    - cron: '0 8 * * *'
   workflow_dispatch:
     inputs:
       date:
@@ -17,20 +13,16 @@ on:
 jobs:
   fetch-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
     permissions:
       contents: write
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -48,12 +40,10 @@ jobs:
 
       - name: Commit new data to repository
         run: |
-          git config user.name  "Bills Bot"
+          git config user.name "Bills Bot"
           git config user.email "bot@billshistorydaily.com"
           git add public/data/
-          git diff --staged --quiet \
-            && echo "No new data to commit — skipping." \
-            || git commit -m "Daily update: $(date -u +%Y-%m-%d)"
+          git diff --staged --quiet && echo "No new data to commit." || git commit -m "Daily update: $(date -u +%Y-%m-%d)"
           git push
 
       - name: Build React app
