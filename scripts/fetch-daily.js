@@ -47,7 +47,16 @@ async function callAnthropic(prompt) {
       model: 'claude-sonnet-4-6',
       max_tokens: 2000,
       tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-      messages: [{ role: 'user', content: prompt }]
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        },
+        {
+          role: 'assistant',
+          content: '{'
+        }
+      ]
     })
   });
 
@@ -55,7 +64,8 @@ async function callAnthropic(prompt) {
   const data = await res.json();
   const tb = data.content?.find(b => b.type === 'text');
   if (!tb) throw new Error('No text in response');
-  return tb.text;
+  // The assistant started with '{' so we prepend it back
+  return '{' + tb.text;
 }
 
 // ── Fetch and parse ───────────────────────────────────────────────────────────
@@ -78,10 +88,16 @@ Rules:
 - writeup: flowing 3-5 sentence summary covering the main stories and their significance
 - articles: every distinct Bills news article from that date, 3-8 items, REAL URLs only
 - If no Bills news: themes:["Quiet news day"], writeup:"No significant Bills news coverage found for this date.", articles:[{"title":"No coverage found","source":"—","url":""}]
-- Respond ONLY with the raw JSON object. No markdown, no backticks, no preamble.`;
+- Your response must be a valid JSON object starting with { and ending with }
+- No text before or after the JSON. No markdown. No backticks. No preamble. No explanation.`;
 
   const raw = await callAnthropic(prompt);
-  const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+
+  // Extract JSON even if there's any stray text
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON found in response: ' + raw.substring(0, 200));
+
+  const parsed = JSON.parse(jsonMatch[0]);
 
   if (!parsed.themes || !parsed.writeup || !parsed.articles) {
     throw new Error('Response missing required fields: ' + JSON.stringify(parsed));
