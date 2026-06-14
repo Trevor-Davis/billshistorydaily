@@ -68,7 +68,16 @@ const style = `
   .cal-day.future { opacity:0.3; cursor:not-allowed; pointer-events:none; }
   .cal-day.has-data::after { content:''; display:block; width:3px; height:3px; border-radius:50%; background:${BLUE}; position:absolute; bottom:2px; left:50%; transform:translateX(-50%); }
 
-  .day-row { display:grid; grid-template-columns:110px 1fr auto; align-items:start; gap:24px; padding:18px 12px; border-bottom:1px solid ${BORDER}; cursor:pointer; transition:background 0.15s; border-radius:4px; margin:0 -12px; }
+
+  /* Day image */
+  .day-row { display:grid; grid-template-columns:90px 110px 1fr auto; align-items:center; gap:16px; padding:14px 12px; border-bottom:1px solid ${BORDER}; cursor:pointer; transition:background 0.15s; border-radius:4px; margin:0 -12px; }
+  .day-thumb { width:90px; height:60px; object-fit:cover; border-radius:4px; flex-shrink:0; background:#f3f4f6; }
+  .day-thumb-placeholder { width:90px; height:60px; border-radius:4px; background:linear-gradient(135deg,#00338D 0%,#001f5c 100%); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:22px; }
+  .detail-image-wrap { margin-bottom:28px; border-radius:8px; overflow:hidden; position:relative; max-height:340px; }
+  .detail-image { width:100%; height:340px; object-fit:cover; display:block; }
+  .detail-image-credit { position:absolute; bottom:8px; right:10px; font-size:10px; color:rgba(255,255,255,0.7); background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:2px; text-decoration:none; }
+  .detail-image-credit:hover { color:#fff; }
+
   .day-row:hover { background:#f0f4ff; }
   .day-row.highlighted { background:#eef2ff; }
   .day-label { padding-top:3px; }
@@ -443,6 +452,10 @@ function HomePage({onDaySelect}) {
         return (
           <div key={key} className="day-entry" style={{animationDelay:`${i*28}ms`}} ref={isPicked?pickedRowRef:null}>
             <div className={`day-row${isPicked?' highlighted':''}`} onClick={()=>onDaySelect(key)}>
+              {data?.image?.thumb
+                ? <img className="day-thumb" src={data.image.thumb} alt={data.image.alt||'Bills news'} />
+                : <div className="day-thumb-placeholder">🦬</div>
+              }
               <div className="day-label">
                 <div className="day-weekday">{formatWeekday(date)}</div>
                 <div className="day-date">{formatDay(date)}</div>
@@ -497,6 +510,16 @@ function DayDetailPage({dayKey, onBack}) {
       {error && <div><div className="detail-error">Failed to load: {error}</div><button className="detail-refresh" onClick={load}>↻ Retry</button></div>}
       {data && !loading && (
         <>
+          {data.image?.url && (
+            <div className="detail-image-wrap">
+              <img className="detail-image" src={data.image.url} alt={data.image.alt||'Bills news'} />
+              {data.image.credit && (
+                <a className="detail-image-credit" href={data.image.creditLink} target="_blank" rel="noopener noreferrer">
+                  Photo: {data.image.credit} / Unsplash
+                </a>
+              )}
+            </div>
+          )}
           {data.writeup && <p className="detail-writeup">{data.writeup}</p>}
           {data.articles && data.articles.length>0 && data.articles[0].title!=='No coverage found' && (
             <div className="articles-label">Coverage from this day</div>
