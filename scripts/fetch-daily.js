@@ -99,26 +99,21 @@ async function extractOgImage(url) {
 async function fetchDailyData(dateKey) {
   const readable = readableDate(dateKey);
 
-  const prompt = `Search for all Buffalo Bills NFL news articles published on ${readable}.
+  const prompt = `Search the web for Buffalo Bills NFL news articles published on ${readable}.
 
-You must respond with ONLY a JSON object — no other text whatsoever before or after it.
+IMPORTANT: You must ONLY output a JSON object. Do NOT explain your findings. Do NOT write any sentences. Do NOT include any text outside the JSON.
 
-The JSON must have exactly this shape:
-{
-  "themes": ["short theme 1", "short theme 2", "short theme 3"],
-  "writeup": "3-5 sentence editorial narrative of the day in engaging sports-journalism style",
-  "articles": [
-    { "title": "Article headline", "source": "Publication name", "url": "https://..." }
-  ]
-}
+Even if you find little or no news, still return the JSON object with themes:["Quiet news day"].
 
-Rules:
-- themes: 2-4 noun phrases (4-6 words max each)
-- writeup: flowing 3-5 sentence summary covering the main stories and their significance
-- articles: every distinct Bills news article from that date, 3-8 items, REAL URLs only
-- If no Bills news: themes:["Quiet news day"], writeup:"No significant Bills news coverage found.", articles:[{"title":"No coverage found","source":"—","url":""}]
-- Your response must be a valid JSON object starting with { and ending with }
-- No text before or after the JSON. No markdown. No backticks. No preamble.`;
+Output this JSON structure and nothing else:
+{"themes":["theme1","theme2"],"writeup":"3-5 sentence summary of the day","articles":[{"title":"headline","source":"publication","url":"https://..."}]}
+
+JSON rules:
+- themes: 2-4 short noun phrases describing the day
+- writeup: engaging sports journalism summary
+- articles: 3-8 real articles with real URLs found in search, or [{"title":"No coverage found","source":"—","url":""}] if none
+- START your response with { and END with }
+- ZERO other text`;
 
   const raw = await callAnthropic(prompt);
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
