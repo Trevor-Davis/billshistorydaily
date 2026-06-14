@@ -2,32 +2,20 @@
  * fetch-daily.js
  *
  * Fetches the previous day's Buffalo Bills news via Anthropic API + web search,
- * fetches a relevant image from Unsplash,
+ * extracts an og:image from one of the article URLs,
  * saves everything to public/data/YYYY-MM-DD.json,
  * and updates public/data/index.json.
- *
- * Runs nightly at 2am ET via GitHub Actions.
- *
- * Manual usage:
- *   ANTHROPIC_API_KEY=sk-ant-... UNSPLASH_ACCESS_KEY=... node scripts/fetch-daily.js
- *   ANTHROPIC_API_KEY=sk-ant-... UNSPLASH_ACCESS_KEY=... node scripts/fetch-daily.js 2024-01-28
  */
 
 const fs   = require('fs');
 const path = require('path');
 
-const API_KEY      = process.env.ANTHROPIC_API_KEY;
-const UNSPLASH_KEY = process.env.UNSPLASH_ACCESS_KEY;
-
+const API_KEY = process.env.ANTHROPIC_API_KEY;
 if (!API_KEY) {
   console.error('ERROR: ANTHROPIC_API_KEY environment variable is not set.');
   process.exit(1);
 }
-if (!UNSPLASH_KEY) {
-  console.warn('WARNING: UNSPLASH_ACCESS_KEY not set. Images will be skipped.');
-}
 
-// ── Target date ───────────────────────────────────────────────────────────────
 function getTargetDate() {
   if (process.argv[2] && process.argv[2].trim()) return process.argv[2].trim();
   const d = new Date();
@@ -57,12 +45,54 @@ async function callAnthropic(prompt) {
       messages: [{ role: 'user', content: prompt }]
     })
   });
-
   if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
   const data = await res.json();
   const tb = data.content?.find(b => b.type === 'text');
   if (!tb) throw new Error('No text in response');
   return tb.text;
+}
+
+// ── Extract og:image from article URL ────────────────────────────────────────
+async function extractOgImage(url) {
+  if (!url || url === '') return null;
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; BillsHistoryBot/1.0)',
+        'Accept': 'text/html'
+      },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    // Try og:image first
+    let match = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
+    if (!match) {
+      // Try content before property
+      match = html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+    }
+    if (!match) {
+      // Try twitter:image as fallback
+      match = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
+    }
+    if (!match) {
+      match = html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
+    }
+
+    if (match && match[1]) {
+      const imgUrl = match[1].trim();
+      // Filter out tiny icons and SVGs
+      if (imgUrl.match(/\.(svg|ico)$/i)) return null;
+      if (imgUrl.includes('logo') && !imgUrl.includes('article')) return null;
+      console.log('  Found image:', imgUrl.substring(0, 70) + '...');
+      return imgUrl;
+    }
+    return null;
+  } catch(e) {
+    console.log('  Could not fetch:', url.substring(0, 50), '-', e.message);
+    return null;
+  }
 }
 
 // ── Fetch Bills news ──────────────────────────────────────────────────────────
@@ -77,7 +107,6 @@ The JSON must have exactly this shape:
 {
   "themes": ["short theme 1", "short theme 2", "short theme 3"],
   "writeup": "3-5 sentence editorial narrative of the day in engaging sports-journalism style",
-  "imageQuery": "a 3-5 word Unsplash search query relevant to the top story (e.g. 'NFL quarterback touchdown pass' or 'football stadium crowd' or 'NFL draft pick')",
   "articles": [
     { "title": "Article headline", "source": "Publication name", "url": "https://..." }
   ]
@@ -86,9 +115,8 @@ The JSON must have exactly this shape:
 Rules:
 - themes: 2-4 noun phrases (4-6 words max each)
 - writeup: flowing 3-5 sentence summary covering the main stories and their significance
-- imageQuery: generic enough to get a good Unsplash photo (avoid player names, use descriptive football terms)
 - articles: every distinct Bills news article from that date, 3-8 items, REAL URLs only
-- If no Bills news: themes:["Quiet news day"], writeup:"No significant Bills news coverage found.", imageQuery:"Buffalo Bills football stadium", articles:[{"title":"No coverage found","source":"—","url":""}]
+- If no Bills news: themes:["Quiet news day"], writeup:"No significant Bills news coverage found.", articles:[{"title":"No coverage found","source":"—","url":""}]
 - Your response must be a valid JSON object starting with { and ending with }
 - No text before or after the JSON. No markdown. No backticks. No preamble.`;
 
@@ -101,40 +129,6 @@ Rules:
     throw new Error('Response missing required fields: ' + JSON.stringify(parsed));
   }
   return parsed;
-}
-
-// ── Fetch Unsplash image ──────────────────────────────────────────────────────
-async function fetchImage(query) {
-  if (!UNSPLASH_KEY) return null;
-
-  try {
-    const q = encodeURIComponent(query);
-    const res = await fetch(
-      `https://api.unsplash.com/search/photos?query=${q}&per_page=1&orientation=landscape`,
-      { headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` } }
-    );
-    if (!res.ok) {
-      console.warn('Unsplash error:', res.status);
-      return null;
-    }
-    const data = await res.json();
-    const photo = data.results?.[0];
-    if (!photo) {
-      console.warn('No Unsplash results for:', query);
-      return null;
-    }
-    return {
-      url: photo.urls.regular,
-      thumb: photo.urls.thumb,
-      small: photo.urls.small,
-      alt: photo.alt_description || query,
-      credit: photo.user.name,
-      creditLink: photo.user.links.html + '?utm_source=bills_history_daily&utm_medium=referral'
-    };
-  } catch(e) {
-    console.warn('Unsplash fetch failed:', e.message);
-    return null;
-  }
 }
 
 // ── Save data ─────────────────────────────────────────────────────────────────
@@ -169,22 +163,23 @@ function saveData(dateKey, data) {
     const data = await fetchDailyData(dateKey);
     console.log('Themes  :', data.themes.join(' | '));
     console.log('Articles:', data.articles.length);
-    console.log('Image query:', data.imageQuery);
 
-    // Fetch image from Unsplash
-    if (data.imageQuery) {
-      console.log('Fetching Unsplash image...');
-      const image = await fetchImage(data.imageQuery);
-      if (image) {
-        data.image = image;
-        console.log('✓ Image fetched:', image.url.substring(0, 60) + '...');
-      } else {
-        console.log('No image found, continuing without.');
-      }
+    // Try to extract og:image from articles
+    console.log('\nLooking for article image...');
+    let imageUrl = null;
+    for (const article of data.articles) {
+      if (!article.url) continue;
+      console.log('Trying:', article.source);
+      imageUrl = await extractOgImage(article.url);
+      if (imageUrl) break;
     }
 
-    // Remove imageQuery from saved data (not needed in JSON)
-    delete data.imageQuery;
+    if (imageUrl) {
+      data.imageUrl = imageUrl;
+      console.log('✓ Image found');
+    } else {
+      console.log('No image found, continuing without.');
+    }
 
     saveData(dateKey, data);
     console.log('\n✓ Done.\n');

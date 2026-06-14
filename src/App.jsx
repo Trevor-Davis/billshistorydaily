@@ -452,10 +452,11 @@ function HomePage({onDaySelect}) {
         return (
           <div key={key} className="day-entry" style={{animationDelay:`${i*28}ms`}} ref={isPicked?pickedRowRef:null}>
             <div className={`day-row${isPicked?' highlighted':''}`} onClick={()=>onDaySelect(key)}>
-              {data?.image?.thumb
-                ? <img className="day-thumb" src={data.image.thumb} alt={data.image.alt||'Bills news'} />
-                : <div className="day-thumb-placeholder">🦬</div>
+              {data?.imageUrl
+                ? <img className="day-thumb" src={data.imageUrl} alt="Bills news" onError={e=>{e.target.style.display='none';e.target.nextSibling.style.display='flex';}} />
+                : null
               }
+              <div className="day-thumb-placeholder" style={{display:data?.imageUrl?'none':'flex'}}>🦬</div>
               <div className="day-label">
                 <div className="day-weekday">{formatWeekday(date)}</div>
                 <div className="day-date">{formatDay(date)}</div>
@@ -510,14 +511,10 @@ function DayDetailPage({dayKey, onBack}) {
       {error && <div><div className="detail-error">Failed to load: {error}</div><button className="detail-refresh" onClick={load}>↻ Retry</button></div>}
       {data && !loading && (
         <>
-          {data.image?.url && (
+          {data.imageUrl && (
             <div className="detail-image-wrap">
-              <img className="detail-image" src={data.image.url} alt={data.image.alt||'Bills news'} />
-              {data.image.credit && (
-                <a className="detail-image-credit" href={data.image.creditLink} target="_blank" rel="noopener noreferrer">
-                  Photo: {data.image.credit} / Unsplash
-                </a>
-              )}
+              <img className="detail-image" src={data.imageUrl} alt="Bills news"
+                onError={e=>{e.target.parentElement.style.display='none';}} />
             </div>
           )}
           {data.writeup && <p className="detail-writeup">{data.writeup}</p>}
