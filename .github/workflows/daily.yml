@@ -29,12 +29,7 @@ jobs:
         run: npm ci
 
       - name: Fetch previous day's Bills news
-        run: |
-          if [ -n "${{ github.event.inputs.date }}" ]; then
-            node scripts/fetch-daily.js "${{ github.event.inputs.date }}"
-          else
-            node scripts/fetch-daily.js
-          fi
+        run: node scripts/fetch-daily.js "${{ github.event.inputs.date }}"
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
@@ -48,10 +43,12 @@ jobs:
           git stash pop
           git add public/data/
           git diff --staged --quiet && echo "No new data to commit." || git commit -m "Daily update: $(date -u +%Y-%m-%d)"
-          git push --force
+          git push
 
       - name: Build React app
         run: npm run build
+        env:
+          CI: false
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
