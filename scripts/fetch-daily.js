@@ -22,7 +22,7 @@ if (!API_KEY) {
 
 // ── Target date ───────────────────────────────────────────────────────────────
 function getTargetDate() {
-  if (process.argv[2]) return process.argv[2];
+  if (process.argv[2] && process.argv[2].trim()) return process.argv[2].trim();
   const d = new Date();
   d.setDate(d.getDate() - 1); // yesterday
   return d.toISOString().split('T')[0];
@@ -47,16 +47,7 @@ async function callAnthropic(prompt) {
       model: 'claude-sonnet-4-6',
       max_tokens: 2000,
       tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        },
-        {
-          role: 'assistant',
-          content: '{'
-        }
-      ]
+      messages: [{ role: 'user', content: prompt }]
     })
   });
 
@@ -64,8 +55,7 @@ async function callAnthropic(prompt) {
   const data = await res.json();
   const tb = data.content?.find(b => b.type === 'text');
   if (!tb) throw new Error('No text in response');
-  // The assistant started with '{' so we prepend it back
-  return '{' + tb.text;
+  return tb.text;
 }
 
 // ── Fetch and parse ───────────────────────────────────────────────────────────
@@ -74,7 +64,9 @@ async function fetchDailyData(dateKey) {
 
   const prompt = `Search for all Buffalo Bills NFL news articles published on ${readable}.
 
-Return a JSON object with exactly this shape:
+You must respond with ONLY a JSON object — no other text whatsoever before or after it.
+
+The JSON must have exactly this shape:
 {
   "themes": ["short theme 1", "short theme 2", "short theme 3"],
   "writeup": "3-5 sentence editorial narrative of the day in engaging sports-journalism style",
@@ -88,14 +80,20 @@ Rules:
 - writeup: flowing 3-5 sentence summary covering the main stories and their significance
 - articles: every distinct Bills news article from that date, 3-8 items, REAL URLs only
 - If no Bills news: themes:["Quiet news day"], writeup:"No significant Bills news coverage found for this date.", articles:[{"title":"No coverage found","source":"—","url":""}]
-- Your response must be a valid JSON object starting with { and ending with }
-- No text before or after the JSON. No markdown. No backticks. No preamble. No explanation.`;
+- DO NOT include any text before or after the JSON
+- DO NOT use markdown code fences or backticks
+- The first character of your response must be { and the last must be }`;
 
   const raw = await callAnthropic(prompt);
 
-  // Extract JSON even if there's any stray text
-  const jsonMatch = raw.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('No JSON found in response: ' + raw.substring(0, 200));
+  // Strip any markdown fences just in case
+  let cleaned = raw.replace(/```json/g, '').replace(/```/g, '').trim();
+
+  // Extract the JSON object using regex as safety net
+  const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) {
+    throw new Error('No JSON found in response. Raw response: ' + raw.substring(0, 300));
+  }
 
   const parsed = JSON.parse(jsonMatch[0]);
 
