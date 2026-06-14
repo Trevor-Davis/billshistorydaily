@@ -52,65 +52,25 @@ async function callAnthropic(prompt) {
   return tb.text;
 }
 
-// ── Extract og:image from article URL ────────────────────────────────────────
-async function extractOgImage(url) {
-  if (!url || url === '') return null;
-  try {
-    const res = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; BillsHistoryBot/1.0)',
-        'Accept': 'text/html'
-      },
-      signal: AbortSignal.timeout(8000)
-    });
-    if (!res.ok) return null;
-    const html = await res.text();
 
-    // Try og:image first
-    let match = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i);
-    if (!match) {
-      // Try content before property
-      match = html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-    }
-    if (!match) {
-      // Try twitter:image as fallback
-      match = html.match(/<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i);
-    }
-    if (!match) {
-      match = html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i);
-    }
-
-    if (match && match[1]) {
-      const imgUrl = match[1].trim();
-      // Filter out tiny icons and SVGs
-      if (imgUrl.match(/\.(svg|ico)$/i)) return null;
-      if (imgUrl.includes('logo') && !imgUrl.includes('article')) return null;
-      console.log('  Found image:', imgUrl.substring(0, 70) + '...');
-      return imgUrl;
-    }
-    return null;
-  } catch(e) {
-    console.log('  Could not fetch:', url.substring(0, 50), '-', e.message);
-    return null;
-  }
-}
 
 // ── Fetch Bills news ──────────────────────────────────────────────────────────
 async function fetchDailyData(dateKey) {
   const readable = readableDate(dateKey);
 
-  const prompt = `Search the web for Buffalo Bills NFL news articles published on ${readable}.
+  const prompt = `Search the web for Buffalo Bills NFL news articles published on ${readable}. Also search for a Buffalo Bills related image from that time period.
 
 IMPORTANT: You must ONLY output a JSON object. Do NOT explain your findings. Do NOT write any sentences. Do NOT include any text outside the JSON.
 
 Even if you find little or no news, still return the JSON object with themes:["Quiet news day"].
 
 Output this JSON structure and nothing else:
-{"themes":["theme1","theme2"],"writeup":"3-5 sentence summary of the day","articles":[{"title":"headline","source":"publication","url":"https://..."}]}
+{"themes":["theme1","theme2"],"writeup":"3-5 sentence summary of the day","imageUrl":"https://direct-url-to-a-buffalo-bills-related-image.jpg","articles":[{"title":"headline","source":"publication","url":"https://..."}]}
 
 JSON rules:
 - themes: 2-4 short noun phrases describing the day
 - writeup: engaging sports journalism summary
+- imageUrl: a direct URL to a real image file (.jpg or .png) related to Buffalo Bills from search results — must be a Buffalo Bills specific image, not another NFL team. Leave as empty string "" if none found.
 - articles: 3-8 real articles with real URLs found in search, or [{"title":"No coverage found","source":"—","url":""}] if none
 - START your response with { and END with }
 - ZERO other text`;
@@ -159,21 +119,10 @@ function saveData(dateKey, data) {
     console.log('Themes  :', data.themes.join(' | '));
     console.log('Articles:', data.articles.length);
 
-    // Try to extract og:image from articles
-    console.log('\nLooking for article image...');
-    let imageUrl = null;
-    for (const article of data.articles) {
-      if (!article.url) continue;
-      console.log('Trying:', article.source);
-      imageUrl = await extractOgImage(article.url);
-      if (imageUrl) break;
-    }
-
-    if (imageUrl) {
-      data.imageUrl = imageUrl;
-      console.log('✓ Image found');
+    if (data.imageUrl) {
+      console.log('✓ Image URL:', data.imageUrl.substring(0, 80) + '...');
     } else {
-      console.log('No image found, continuing without.');
+      console.log('No image found.');
     }
 
     saveData(dateKey, data);
