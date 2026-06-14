@@ -1,20 +1,13 @@
 /**
- * fetch-daily.js
- *
- * Fetches the previous day's Buffalo Bills news via Anthropic API + web search,
- * extracts an og:image from one of the article URLs,
- * saves everything to public/data/YYYY-MM-DD.json,
- * and updates public/data/index.json.
+ * fetch-daily.js — Bills History Daily
+ * Two-step: (1) search for news, (2) format as JSON
  */
 
 const fs   = require('fs');
 const path = require('path');
 
 const API_KEY = process.env.ANTHROPIC_API_KEY;
-if (!API_KEY) {
-  console.error('ERROR: ANTHROPIC_API_KEY environment variable is not set.');
-  process.exit(1);
-}
+if (!API_KEY) { console.error('ERROR: ANTHROPIC_API_KEY not set.'); process.exit(1); }
 
 function getTargetDate() {
   if (process.argv[2] && process.argv[2].trim()) return process.argv[2].trim();
@@ -29,8 +22,16 @@ function readableDate(key) {
   });
 }
 
-// ── Anthropic API call ────────────────────────────────────────────────────────
-async function callAnthropic(prompt) {
+async function callAnthropic(messages, useSearch = false) {
+  const body = {
+    model: 'claude-sonnet-4-6',
+    max_tokens: 2000,
+    messages
+  };
+  if (useSearch) {
+    body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+  }
+
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -38,13 +39,9 @@ async function callAnthropic(prompt) {
       'x-api-key': API_KEY,
       'anthropic-version': '2023-06-01'
     },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 2000,
-      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-      messages: [{ role: 'user', content: prompt }]
-    })
+    body: JSON.stringify(body)
   });
+
   if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
   const data = await res.json();
   const tb = data.content?.find(b => b.type === 'text');
@@ -52,41 +49,58 @@ async function callAnthropic(prompt) {
   return tb.text;
 }
 
-
-
-// ── Fetch Bills news ──────────────────────────────────────────────────────────
 async function fetchDailyData(dateKey) {
   const readable = readableDate(dateKey);
 
-  const prompt = `Search the web for Buffalo Bills NFL news articles published on ${readable}. Also search for a Buffalo Bills related image from that time period.
+  // ── Step 1: Search for news (free-form, let Claude write naturally) ──
+  console.log('Step 1: Searching for Bills news...');
+  const searchResult = await callAnthropic([{
+    role: 'user',
+    content: `Search the web for Buffalo Bills NFL news and articles from ${readable}. 
+Find as many relevant articles as possible. For each article note the title, source, and URL.
+Also note the main topics/themes of the day's coverage.
+Write a brief summary of what you found.`
+  }], true);
 
-IMPORTANT: You must ONLY output a JSON object. Do NOT explain your findings. Do NOT write any sentences. Do NOT include any text outside the JSON.
+  console.log('Search complete. Step 2: Formatting as JSON...');
 
-Even if you find little or no news, still return the JSON object with themes:["Quiet news day"].
+  // ── Step 2: Format as JSON (no tools, pure formatting task) ──
+  const jsonResult = await callAnthropic([{
+    role: 'user',
+    content: `Here is a summary of Buffalo Bills news from ${readable}:
 
-Output this JSON structure and nothing else:
-{"themes":["theme1","theme2"],"writeup":"3-5 sentence summary of the day","imageUrl":"https://direct-url-to-a-buffalo-bills-related-image.jpg","articles":[{"title":"headline","source":"publication","url":"https://..."}]}
+${searchResult}
 
-JSON rules:
-- themes: 2-4 short noun phrases describing the day
-- writeup: engaging sports journalism summary
-- imageUrl: a direct URL to a real image file (.jpg or .png) related to Buffalo Bills from search results — must be a Buffalo Bills specific image, not another NFL team. Leave as empty string "" if none found.
-- articles: 3-8 real articles with real URLs found in search, or [{"title":"No coverage found","source":"—","url":""}] if none
-- START your response with { and END with }
-- ZERO other text`;
+Now convert this into a JSON object with exactly this structure:
+{
+  "themes": ["theme 1", "theme 2", "theme 3"],
+  "writeup": "3-5 sentence editorial summary",
+  "imageUrl": "",
+  "articles": [
+    {"title": "headline", "source": "publication", "url": "https://..."}
+  ]
+}
 
-  const raw = await callAnthropic(prompt);
-  const jsonMatch = raw.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('No JSON in response: ' + raw.substring(0, 200));
+Rules:
+- themes: 2-4 short noun phrases (4-6 words each) describing the main stories
+- writeup: engaging 3-5 sentence sports journalism narrative
+- imageUrl: leave as empty string ""
+- articles: include every article mentioned above with its real URL
+- If no Bills news was found: themes:["Quiet news day"], writeup:"No significant Bills news coverage found for this date.", articles:[{"title":"No coverage found","source":"—","url":""}]
+
+Respond with ONLY the JSON object. No other text.`
+  }], false);
+
+  const jsonMatch = jsonResult.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('No JSON in formatting response: ' + jsonResult.substring(0, 200));
 
   const parsed = JSON.parse(jsonMatch[0]);
   if (!parsed.themes || !parsed.writeup || !parsed.articles) {
-    throw new Error('Response missing required fields: ' + JSON.stringify(parsed));
+    throw new Error('Missing required fields: ' + JSON.stringify(parsed));
   }
   return parsed;
 }
 
-// ── Save data ─────────────────────────────────────────────────────────────────
 function saveData(dateKey, data) {
   const dataDir = path.join(__dirname, '..', 'public', 'data');
   fs.mkdirSync(dataDir, { recursive: true });
@@ -109,24 +123,15 @@ function saveData(dateKey, data) {
   console.log(`✓ Updated index.json (${index.dates.length} dates total)`);
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
 (async () => {
   const dateKey = getTargetDate();
   console.log(`\nFetching Bills news for: ${dateKey} (${readableDate(dateKey)})\n`);
-
   try {
     const data = await fetchDailyData(dateKey);
+    saveData(dateKey, data);
+    console.log('\n✓ Done.');
     console.log('Themes  :', data.themes.join(' | '));
     console.log('Articles:', data.articles.length);
-
-    if (data.imageUrl) {
-      console.log('✓ Image URL:', data.imageUrl.substring(0, 80) + '...');
-    } else {
-      console.log('No image found.');
-    }
-
-    saveData(dateKey, data);
-    console.log('\n✓ Done.\n');
   } catch (err) {
     console.error('\n✗ Failed:', err.message);
     process.exit(1);
