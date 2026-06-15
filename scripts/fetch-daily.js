@@ -1,6 +1,7 @@
 /**
  * fetch-daily.js — Bills History Daily
  * Two-step: (1) search for news, (2) format as JSON
+ * Then tries to extract og:image from article pages.
  */
 
 const fs   = require('fs');
@@ -31,7 +32,6 @@ async function callAnthropic(messages, useSearch = false) {
   if (useSearch) {
     body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
   }
-
   let res;
   try {
     res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -44,23 +44,56 @@ async function callAnthropic(messages, useSearch = false) {
       body: JSON.stringify(body)
     });
   } catch(networkErr) {
-    throw new Error(`Network error connecting to Anthropic API: ${networkErr.message}. Check that GitHub Actions can reach api.anthropic.com`);
+    throw new Error(`Network error: ${networkErr.message}`);
   }
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`API error ${res.status}: ${errText}`);
-  }
+  if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
   const data = await res.json();
   const tb = data.content?.find(b => b.type === 'text');
   if (!tb) throw new Error('No text in response');
   return tb.text;
 }
 
+// ── Extract og:image from an article URL ─────────────────────────────────────
+async function extractOgImage(url) {
+  if (!url) return null;
+  try {
+    const res = await fetch(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BillsHistoryBot/1.0)' },
+      signal: AbortSignal.timeout(6000)
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+
+    // Try og:image
+    const patterns = [
+      /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
+      /<meta[^>]+name=["']twitter:image["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image["']/i,
+    ];
+
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match && match[1]) {
+        const imgUrl = match[1].trim();
+        if (imgUrl.match(/\.(svg|ico)$/i)) continue;
+        if (imgUrl.length < 10) continue;
+        console.log(`  ✓ Found og:image: ${imgUrl.substring(0, 70)}`);
+        return imgUrl;
+      }
+    }
+    return null;
+  } catch(e) {
+    console.log(`  Could not fetch ${url.substring(0, 50)}: ${e.message}`);
+    return null;
+  }
+}
+
+// ── Fetch Bills news ──────────────────────────────────────────────────────────
 async function fetchDailyData(dateKey) {
   const readable = readableDate(dateKey);
 
-  // ── Step 1: Search for news (free-form, let Claude write naturally) ──
+  // Step 1: Search for news (free-form)
   console.log('Step 1: Searching for Bills news...');
   const searchResult = await callAnthropic([{
     role: 'user',
@@ -70,45 +103,65 @@ Also note the main topics/themes of the day's coverage.
 Write a brief summary of what you found.`
   }], true);
 
-  console.log('Search complete. Step 2: Formatting as JSON...');
-
-  // ── Step 2: Format as JSON (no tools, pure formatting task) ──
+  // Step 2: Format as JSON
+  console.log('Step 2: Formatting as JSON...');
   const jsonResult = await callAnthropic([{
     role: 'user',
     content: `Here is a summary of Buffalo Bills news from ${readable}:
 
 ${searchResult}
 
-Now convert this into a JSON object with exactly this structure:
+Convert this into a JSON object with exactly this structure:
 {
   "themes": ["theme 1", "theme 2", "theme 3"],
   "writeup": "3-5 sentence editorial summary",
-  "imageUrl": "",
   "articles": [
     {"title": "headline", "source": "publication", "url": "https://..."}
   ]
 }
 
 Rules:
-- themes: 2-4 short noun phrases (4-6 words each) describing the main stories
+- themes: 2-4 short noun phrases (4-6 words each)
 - writeup: engaging 3-5 sentence sports journalism narrative
-- imageUrl: leave as empty string ""
-- articles: include every article mentioned above with its real URL
-- If no Bills news was found: themes:["Quiet news day"], writeup:"No significant Bills news coverage found for this date.", articles:[{"title":"No coverage found","source":"—","url":""}]
+- articles: every article with its real URL
+- If no Bills news: themes:["Quiet news day"], writeup:"No significant Bills news found.", articles:[{"title":"No coverage found","source":"—","url":""}]
 
 Respond with ONLY the JSON object. No other text.`
   }], false);
 
   const jsonMatch = jsonResult.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error('No JSON in formatting response: ' + jsonResult.substring(0, 200));
+  if (!jsonMatch) throw new Error('No JSON in response: ' + jsonResult.substring(0, 200));
 
   const parsed = JSON.parse(jsonMatch[0]);
   if (!parsed.themes || !parsed.writeup || !parsed.articles) {
     throw new Error('Missing required fields: ' + JSON.stringify(parsed));
   }
+
+  // Step 3: Try to extract og:image from each article
+  console.log('Step 3: Looking for article image...');
+  let imageUrl = '';
+  for (const article of parsed.articles) {
+    if (!article.url || article.url === '') continue;
+    console.log(`  Trying: ${article.source}`);
+    const img = await extractOgImage(article.url);
+    if (img) {
+      imageUrl = img;
+      break;
+    }
+  }
+
+  if (imageUrl) {
+    parsed.imageUrl = imageUrl;
+    console.log('✓ Image found');
+  } else {
+    parsed.imageUrl = '';
+    console.log('No image found — app will use fallback.');
+  }
+
   return parsed;
 }
 
+// ── Save data ─────────────────────────────────────────────────────────────────
 function saveData(dateKey, data) {
   const dataDir = path.join(__dirname, '..', 'public', 'data');
   fs.mkdirSync(dataDir, { recursive: true });
@@ -131,6 +184,7 @@ function saveData(dateKey, data) {
   console.log(`✓ Updated index.json (${index.dates.length} dates total)`);
 }
 
+// ── Main ──────────────────────────────────────────────────────────────────────
 (async () => {
   const dateKey = getTargetDate();
   console.log(`\nFetching Bills news for: ${dateKey} (${readableDate(dateKey)})\n`);
@@ -140,8 +194,9 @@ function saveData(dateKey, data) {
     console.log('\n✓ Done.');
     console.log('Themes  :', data.themes.join(' | '));
     console.log('Articles:', data.articles.length);
+    console.log('Image   :', data.imageUrl || '(none - will use fallback)');
   } catch (err) {
     console.error('\n✗ Failed:', err.message);
     process.exit(1);
   }
-})(); 
+})();
