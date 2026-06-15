@@ -1,47 +1,17 @@
 {
   "themes": [
-    "Mandatory minicamp preview and hype",
-    "Josh Allen all-time TD record chase",
-    "New coaching staff under Joe Brady",
-    "Jim Leonhard's defensive scheme debut"
+    "Mandatory minicamp week begins",
+    "Offseason roster evaluation underway",
+    "Rookie and quarterback development watch",
+    "Bills 2026 season preview coverage"
   ],
-  "writeup": "June 8, 2026 was all about anticipation in Buffalo, as the Bills stood on the eve of their three-day mandatory minicamp — the first under new head coach Joe Brady and defensive coordinator Jim Leonhard. Beat writers and analysts turned their attention to what to expect on the practice field, with storylines ranging from Josh Allen's path to becoming the NFL's all-time total touchdown record holder to how Leonhard's revamped defensive scheme would take shape. The day's coverage also spotlighted which players had the most to prove heading into the summer sessions, underscoring the sense of renewal and heightened expectations surrounding the post-McDermott era in Orchard Park. With the new Highmark Stadium looming on the horizon and Super Bowl ambitions very much alive, the Bills and their fanbase were buzzing with cautious optimism.",
+  "writeup": "The Buffalo Bills entered a critical stretch of their offseason as mandatory minicamp week kicked off on June 9, 2026, with June 8 serving as a hub of anticipatory coverage from around the NFL media landscape. Analysts and reporters turned their attention to which players — particularly rookies and quarterbacks — would make the biggest impressions under the watchful eye of coaching staffs. ESPN led the charge with a league-wide minicamp preview highlighting key storylines to monitor across all 32 teams, with the Bills featured among the most closely watched franchises. The minicamp period represents one of the final opportunities for players to solidify roster spots and for coaches to install schemes before the long summer break ahead of training camp.",
+  "imageUrl": "",
   "articles": [
     {
-      "title": "Bills three-day mandatory minicamp starts today",
-      "source": "Buffalo Rumblings",
-      "url": "https://www.buffalorumblings.com/buffalo-bills-news/135074/bills-news-recapping-day-1-of-mandatory-minicamp"
-    },
-    {
-      "title": "Here's what Josh Allen will need to do to become NFL's all-time total TD record holder",
-      "source": "Buffalo Rumblings",
-      "url": "https://www.buffalorumblings.com/buffalo-bills-news/135168/calculating-what-josh-allen-will-need-to-do-to-become-nfls-all-time-total-touchdown-record-holder"
-    },
-    {
-      "title": "2026 NFL minicamps: Teams, rookies, QBs we're watching (Bills among June 8-11 participants)",
+      "title": "2026 NFL Minicamps: Teams, Rookies, QBs We're Watching",
       "source": "ESPN",
       "url": "https://www.espn.com/nfl/story/_/id/48988004/2026-nfl-minicamps-otas-teams-rookies-qbs-veterans-watching"
-    },
-    {
-      "title": "4 Buffalo Bills With the Most to Prove During Mandatory Minicamp",
-      "source": "Sports Illustrated / Bills On SI",
-      "url": "https://www.si.com/nfl/bills/onsi/4-buffalo-bills-most-to-prove-during-mandatory-minicamp"
-    },
-    {
-      "title": "Joe Brady ready to finish offseason with good minicamp",
-      "source": "WGR 550",
-      "url": "https://www.wgr550.com/2026/06/08/joe-brady-ready-to-finish-offseason-with-good-minicamp/"
-    },
-    {
-      "title": "Bills 2026 OTA and minicamp dates: Mandatory minicamp June 9-11",
-      "source": "Buffalo Rumblings",
-      "url": "https://www.buffalorumblings.com/buffalo-bills-news/131884/buffalo-bills-2026-ota-and-minicamp-dates-released"
-    },
-    {
-      "title": "Grading the Buffalo Bills' 2026 offseason ahead of minicamp",
-      "source": "Buffalo Rumblings",
-      "url": "https://www.buffalorumblings.com/buffalo-bills-opinion/135335/grading-the-buffalo-bills-2026-offseason"
     }
-  ],
-  "imageUrl": "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/06/gettyimages-2280160073.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.732984293194%2C100%2C78.534031413613&amp;w=1200"
+  ]
 }
