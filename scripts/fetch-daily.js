@@ -144,4 +144,4 @@ function saveData(dateKey, data) {
     console.error('\n✗ Failed:', err.message);
     process.exit(1);
   }
-})();
+})(); 
