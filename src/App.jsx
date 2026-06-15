@@ -514,6 +514,18 @@ function HomePage({onDaySelect}) {
           </div>
         );
       })}
+
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button className="page-btn" onClick={()=>{ setPage(p=>p-1); window.scrollTo(0,0); }} disabled={page===0}>
+            ← Newer
+          </button>
+          <span className="page-info">Page {page + 1} of {totalPages}</span>
+          <button className="page-btn" onClick={()=>{ setPage(p=>p+1); window.scrollTo(0,0); }} disabled={page>=totalPages-1}>
+            Older →
+          </button>
+        </div>
+      )}
     </main>
   );
 }
