@@ -32,17 +32,25 @@ async function callAnthropic(messages, useSearch = false) {
     body.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
   }
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify(body)
-  });
+  let res;
+  try {
+    res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify(body)
+    });
+  } catch(networkErr) {
+    throw new Error(`Network error connecting to Anthropic API: ${networkErr.message}. Check that GitHub Actions can reach api.anthropic.com`);
+  }
 
-  if (!res.ok) throw new Error(`API error ${res.status}: ${await res.text()}`);
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`API error ${res.status}: ${errText}`);
+  }
   const data = await res.json();
   const tb = data.content?.find(b => b.type === 'text');
   if (!tb) throw new Error('No text in response');
