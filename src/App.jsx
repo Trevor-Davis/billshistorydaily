@@ -218,7 +218,7 @@ function buildCalGrid(year, month) {
 // ── STATIC DATA LOADING ───────────────────────────────────────────────────────
 async function loadIndex() {
   try {
-    const res = await fetch('/data/index.json');
+    const res = await fetch('/data/index.json?t=' + Date.now());
     if (!res.ok) return { dates: [] };
     return res.json();
   } catch(e) { return { dates: [] }; }
