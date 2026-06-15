@@ -165,6 +165,28 @@ const style = `
   .sched-time { font-size:12px; color:${MUTED}; padding:14px 12px; white-space:nowrap; }
   .sched-tv { font-size:11px; font-weight:600; color:${BLUE}; padding:14px 12px; letter-spacing:0.5px; }
 
+  /* Pagination */
+  .pagination {
+    display:flex; align-items:center; justify-content:center;
+    gap:16px; margin-top:32px; padding-top:24px;
+    border-top:1px solid ${BORDER};
+  }
+  .page-btn {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:9px 20px; font-size:11px; letter-spacing:1.5px;
+    text-transform:uppercase; border-radius:3px; cursor:pointer;
+    font-family:'Source Serif 4',serif; font-weight:600;
+    border:1px solid ${BLUE}; background:${BG}; color:${BLUE};
+    transition:background 0.15s,color 0.15s;
+  }
+  .page-btn:hover { background:${BLUE}; color:#fff; }
+  .page-btn:disabled { opacity:0.3; cursor:not-allowed; border-color:${BORDER}; color:${MUTED}; }
+  .page-btn:disabled:hover { background:${BG}; color:${MUTED}; }
+  .page-info {
+    font-size:12px; letter-spacing:1px; text-transform:uppercase;
+    color:${MUTED}; font-weight:400;
+  }
+
   .spinner { width:14px; height:14px; border:2px solid #bfdbfe; border-top-color:${BLUE}; border-radius:50%; animation:spin 0.8s linear infinite; flex-shrink:0; }
   @keyframes spin { to{transform:rotate(360deg)} }
   @keyframes fadeSlideIn { from{opacity:0;transform:translateY(-5px)} to{opacity:1;transform:translateY(0)} }
@@ -345,18 +367,20 @@ const DOW = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
 function HomePage({onDaySelect}) {
   const today = new Date(); today.setHours(12,0,0,0);
+  const PAGE_SIZE = 14;
   const [index, setIndex] = useState({dates:[]});
   const [cache, setCache] = useState({});
   const [calOpen, setCalOpen] = useState(false);
   const [calYear, setCalYear] = useState(today.getFullYear());
   const [calMonth, setCalMonth] = useState(today.getMonth());
   const [pickedKey, setPickedKey] = useState(null);
+  const [page, setPage] = useState(0);
   const pickedRowRef = useRef(null);
 
   useEffect(()=>{
     loadIndex().then(idx=>{
       setIndex(idx);
-      (idx.dates||[]).slice(0,14).forEach(async key=>{
+      (idx.dates||[]).slice(0, PAGE_SIZE).forEach(async key=>{
         try {
           const data = await loadDayData(key);
           setCache(c=>({...c,[key]:data}));
@@ -365,10 +389,26 @@ function HomePage({onDaySelect}) {
     });
   },[]);
 
+  // When page changes, load that page's dates
+  useEffect(()=>{
+    const allDates = index.dates || [];
+    const start = page * PAGE_SIZE;
+    allDates.slice(start, start + PAGE_SIZE).forEach(async key=>{
+      if (cache[key]) return;
+      try {
+        const data = await loadDayData(key);
+        setCache(c=>({...c,[key]:data}));
+      } catch(e){}
+    });
+  },[page, index]);
+
+  const allDates = index.dates || [];
+  const totalPages = Math.ceil(allDates.length / PAGE_SIZE);
+  const pageDates = allDates.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE).map(fromKey);
+
   const listDates = (()=>{
-    const dates14 = (index.dates||[]).slice(0,14).map(fromKey);
-    if (!pickedKey || (index.dates||[]).includes(pickedKey)) return dates14;
-    return [fromKey(pickedKey), ...dates14];
+    if (pickedKey && !allDates.includes(pickedKey)) return [fromKey(pickedKey), ...pageDates];
+    return pageDates;
   })();
 
   async function pickDate(key) {
