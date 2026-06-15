@@ -73,8 +73,8 @@ const style = `
   .day-row { display:grid; grid-template-columns:90px 110px 1fr auto; align-items:center; gap:16px; padding:14px 12px; border-bottom:1px solid ${BORDER}; cursor:pointer; transition:background 0.15s; border-radius:4px; margin:0 -12px; }
   .day-thumb { width:90px; height:60px; object-fit:cover; border-radius:4px; flex-shrink:0; background:#f3f4f6; }
   .day-thumb-placeholder { width:90px; height:60px; border-radius:4px; background:linear-gradient(135deg,#00338D 0%,#001f5c 100%); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:22px; }
-  .detail-image-wrap { margin-bottom:28px; border-radius:8px; overflow:hidden; position:relative; max-height:340px; }
-  .detail-image { width:100%; height:340px; object-fit:cover; display:block; }
+  .detail-image-wrap { margin-bottom:28px; border-radius:8px; overflow:hidden; position:relative; }
+  .detail-image { width:100%; height:auto; max-height:480px; object-fit:contain; display:block; background:#f3f4f6; }
   .detail-image-credit { position:absolute; bottom:8px; right:10px; font-size:10px; color:rgba(255,255,255,0.7); background:rgba(0,0,0,0.4); padding:2px 6px; border-radius:2px; text-decoration:none; }
   .detail-image-credit:hover { color:#fff; }
 
