@@ -1,30 +1,61 @@
 {
   "themes": [
-    "2026 schedule: five primetime games",
-    "Rookie minicamp wrap-up",
-    "97 Rock named official flagship station"
+    "New Highmark Stadium keys received",
+    "Myles Garrett blockbuster trade impact",
+    "Post-June 1 Bills trade targets"
   ],
-  "writeup": "With the full 2026 regular season schedule in hand, analysts broke down a demanding slate: five primetime appearances, a Thanksgiving home matchup against Kansas City, and a Christmas Day road trip to Denver. Rookie minicamp concluded at One Bills Drive, with first-round pick TJ Parker drawing early praise from coaches for his motor and football IQ. The Bills also formally announced that 97 Rock WGRF-FM will serve as the team's official flagship radio station for the 2026 season.",
+  "writeup": "June 1, 2026 marked a historic day for the Buffalo Bills franchise as the team received the keys to their brand-new Highmark Stadium, with a temporary certificate of occupancy officially issued and the moving process set to begin. The moment represented the culmination of years of planning and investment, signaling that the Bills' long-awaited home was finally becoming a reality. Meanwhile, the NFL world was buzzing over the blockbuster trade sending Myles Garrett to the Los Angeles Rams, a move that directly affects the Bills' 2026 schedule and the broader AFC/NFC competitive landscape. Analysts at ESPN and Buffalo-focused outlets wasted no time breaking down what Garrett's new home means for primetime matchups and championship contention. With June 1 also serving as a traditional roster and trade deadline marker, Bills fans and media alike were already looking ahead to potential trade targets the team should pursue before training camp opens.",
   "articles": [
     {
-      "title": "Buffalo Bills 2026 Schedule \u2014 Full breakdown with primetime matchups",
-      "source": "buffalobills.com",
-      "url": "https://www.buffalobills.com/news/buffalo-bills-schedule-2026"
+      "title": "Buffalo Bills Begin Moving Into New Highmark Stadium",
+      "source": "Spectrum News 1 (Buffalo)",
+      "url": "https://spectrumlocalnews.com/nys/buffalo/news/2026/06/01/buffalo-bills-to-begin-moving-into-new-highmark-stadium-monday"
     },
     {
-      "title": "New Bills OLB TJ Parker beaming about his new home in Buffalo",
-      "source": "buffalobills.com",
-      "url": "https://www.buffalobills.com/news/"
+      "title": "Buffalo Bills Receive Keys to New Highmark Stadium as a Temporary Certificate of Occupancy is Issued",
+      "source": "WKBW (News 4 Buffalo)",
+      "url": "https://www.wkbw.com/news/local-news/bills-receive-keys-to-new-highmark-stadium-as-a-temporary-certificate-of-occupancy-issued"
     },
     {
-      "title": "Bills announce 97 Rock WGRF-FM as official flagship radio station for 2026",
-      "source": "buffalobills.com",
-      "url": "https://www.buffalobills.com/news/"
+      "title": "Buffalo Bills Receive Keys to New Highmark Stadium as a Temporary Certificate of Occupancy is Issued",
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/02/buffalo-bills-receive-keys-to-new-highmark-stadium-as-a-temporary-certificate-of-occupancy-is-issued/"
     },
     {
-      "title": "Bills take part in third annual full-team community takeover",
-      "source": "buffalobills.com",
-      "url": "https://www.buffalobills.com/news/"
+      "title": "Buffalo Bills Now Have Myles Garrett on Their 2026 Schedule",
+      "source": "Buffalo Rumblings",
+      "url": "https://www.buffalorumblings.com/buffalo-bills-schedule/134858/buffalo-bills-now-have-myles-garrett-on-their-2026-schedule"
+    },
+    {
+      "title": "Bills Now Have Myles Garrett on Their 2026 Schedule",
+      "source": "Yahoo Sports",
+      "url": "https://sports.yahoo.com/articles/bills-now-myles-garrett-2026-180236747.html"
+    },
+    {
+      "title": "Barnwell Makes Sense of the Myles Garrett Blockbuster: What the Trade Means for the Rams, Browns",
+      "source": "ESPN",
+      "url": "https://www.espn.com/nfl/story/_/id/48939835/2026-nfl-offseason-trade-myles-garrett-jared-verse-rams-browns-draft-picks-barnwell"
+    },
+    {
+      "title": "2026 NFL Offseason Trade Tracker: Wanya Morris, Myles Garrett",
+      "source": "ESPN",
+      "url": "https://www.espn.com/nfl/story/_/id/48915793/2026-nfl-offseason-trade-tracker-updates-news-contracts-training-camp-preseason"
+    },
+    {
+      "title": "Rams' Myles Garrett Trade Works Out Very Well for NFL's 2026 Primetime Schedule",
+      "source": "Awful Announcing / Yahoo Sports",
+      "url": "https://sports.yahoo.com/articles/rams-myles-garrett-trade-works-000050156.html"
+    },
+    {
+      "title": "3 Post-June 1 Trade Targets Buffalo Bills Need to Consider",
+      "source": "Sports Illustrated / Bills Central",
+      "url": "https://www.si.com/nfl/bills/onsi/3-post-june-1-trade-targets-buffalo-bills-need-consider"
+    },
+    {
+      "title": "5 Important Trade Targets Bills Should Consider Before Training Camp",
+      "source": "Buffalo Down / Bleacher Report",
+      "url": "https://buffalowdown.com/5-important-trade-targets-bills-should-consider-before-training-camp-01kt5hxvn1yt"
     }
-  ]
+  ],
+  "imageUrl": "https://s7d2.scene7.com/is/image/TWCNews/highmarkstadium-5"
 }
