@@ -57,8 +57,9 @@ async function callAnthropic(messages, useSearch = false) {
 const RSS_FEEDS = [
   { name: 'Buffalo Rumblings', url: 'https://www.buffalorumblings.com/rss/index.xml', loose: true },
   { name: 'Two Bills Drive',   url: 'https://www.twobillsdrive.com/rss', loose: true },
-  { name: 'Buffalo News',      url: 'https://buffalonews.com/feed/', loose: true },
-  { name: 'Bills Wire',        url: 'https://billswire.usatoday.com/feed', loose: true },
+  { name: 'Buffalo News',      url: 'https://buffalonews.com/search/?f=rss&t=article&c=sports/football/nfl/buffalo_bills&l=50&s=start_time&sd=desc', loose: true },
+  { name: 'Bills Wire',        url: 'https://billswire.usatoday.com/rss', loose: true },
+  { name: 'Buffalo Bills',     url: 'https://www.buffalobills.com/rss/news', loose: true },
 ];
 
 function extractText(xml, tag) {
