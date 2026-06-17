@@ -55,10 +55,10 @@ async function callAnthropic(messages, useSearch = false) {
 
 // ── RSS feed fetching ────────────────────────────────────────────────────────
 const RSS_FEEDS = [
-  { name: 'Buffalo Rumblings', url: 'https://www.buffalorumblings.com/rss/index.xml' },
+  { name: 'Buffalo Rumblings', url: 'https://www.buffalorumblings.com/rss/index.xml', loose: true },
   { name: 'Two Bills Drive',   url: 'https://www.twobillsdrive.com/rss', loose: true },
-  { name: 'Buffalo News',      url: 'https://buffalonews.com/tag/buffalo-bills/feed/' },
-  { name: 'Bills Wire',        url: 'https://billswire.usatoday.com/wp-json/wp/v2/posts?per_page=20&_fields=title,link,date&categories=1', json: true },
+  { name: 'Buffalo News',      url: 'https://buffalonews.com/feed/', loose: true },
+  { name: 'Bills Wire',        url: 'https://billswire.usatoday.com/feed', loose: true },
 ];
 
 function extractText(xml, tag) {
