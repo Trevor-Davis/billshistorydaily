@@ -55,18 +55,27 @@ async function callAnthropic(messages, useSearch = false) {
 
 // ── RSS feed fetching ────────────────────────────────────────────────────────
 const RSS_FEEDS = [
-  { name: 'Buffalo Rumblings', url: 'https://www.buffalorumblings.com/rss/current' },
+  { name: 'Buffalo Rumblings', url: 'https://www.buffalorumblings.com/rss/index.xml' },
   { name: 'Two Bills Drive',   url: 'https://www.twobillsdrive.com/rss' },
-  { name: 'Buffalo News',      url: 'https://buffalonews.com/sports/bills/feed' },
-  { name: 'NFL.com Bills',     url: 'https://www.nfl.com/feeds/team/news/BUF' },
+  { name: 'Buffalo News',      url: 'https://buffalonews.com/search/?f=rss&t=article&c=sports/football/nfl/buffalo_bills&l=50&s=start_time&sd=desc' },
+  { name: 'Bills Wire',        url: 'https://billswire.usatoday.com/feed/' },
 ];
 
 function extractText(xml, tag) {
-  // Try CDATA first, then plain text
-  const cdataRe = new RegExp('<' + tag + '[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/' + tag + '>', 'i');
-  const plainRe  = new RegExp('<' + tag + '[^>]*>([\s\S]*?)<\/' + tag + '>', 'i');
-  const m = xml.match(cdataRe) || xml.match(plainRe);
-  return m ? m[1].replace(/<[^>]+>/g, '').trim() : null;
+  // Try CDATA first
+  let idx = xml.indexOf('<' + tag);
+  if (idx === -1) return null;
+  let start = xml.indexOf('>', idx) + 1;
+  let end = xml.indexOf('</' + tag, start);
+  if (end === -1) return null;
+  let val = xml.slice(start, end).trim();
+  // Strip CDATA wrapper if present
+  if (val.startsWith('<![CDATA[')) {
+    val = val.slice(9);
+    if (val.endsWith(']]>')) val = val.slice(0, -3);
+  }
+  // Strip any remaining HTML tags
+  return val.replace(/<[^>]+>/g, '').trim() || null;
 }
 
 function extractLink(item) {
