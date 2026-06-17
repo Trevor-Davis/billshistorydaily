@@ -1,14 +1,102 @@
 {
   "themes": [
-    "2026 training camp schedule released"
+    "2026 training camp schedule released",
+    "New Highmark Stadium excitement building",
+    "Offensive line contract situations developing",
+    "Bills reflect on successful spring"
   ],
-  "writeup": "The Buffalo Bills made a notable offseason announcement on June 16, 2026, releasing their official 2026 training camp schedule for fans and media. This type of release typically signals the organization is ramping up preparations for the upcoming season, giving supporters key dates to plan around. Coverage on this date was otherwise sparse, with only one confirmed article surfacing from WGR Sports Radio 550, the Bills' flagship radio partner. The training camp schedule announcement remains a meaningful milestone as Buffalo looks to build on recent seasons.",
+  "writeup": "The Buffalo Bills made a significant offseason announcement on June 16, 2026, releasing their 2026 Training Camp schedule, which includes seven open practices at St. John Fisher University — though notably fewer than in previous years. Excitement around the new Highmark Stadium continued to build as the first bison statue was installed outside the venue, giving fans a tangible preview of the new game-day experience. On the contract front, the future deal for right guard O'Cyrus Torrence is drawing attention, with Joe Tippman's recent extension setting a market benchmark that will directly influence negotiations. Meanwhile, Josh Allen expressed confidence in the team's spring progress, and a retrospective piece reminded fans that amid ongoing Super Bowl window conversations, the Bills have already secured championships worth celebrating.",
   "articles": [
     {
+      "title": "Buffalo Bills announce 2026 Training Camp schedule and ticket information",
+      "source": "Buffalo Bills Official",
+      "url": "https://www.buffalobills.com/news/buffalo-bills-announce-2026-training-camp-schedule-and-ticket-information"
+    },
+    {
       "title": "Bills release 2026 training camp schedule",
-      "source": "Audacy / WGR Sports Radio 550",
-      "url": "https://www.audacy.com/wgr550/sports/bills/bills-release-2026-training-camp-schedule"
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/17/bills-release-2026-training-camp-schedule/"
+    },
+    {
+      "title": "Mark your calendars: Buffalo Bills release 2026 Training Camp schedule",
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/17/mark-your-calendars-buffalo-bills-release-2026-training-camp-schedule/"
+    },
+    {
+      "title": "Buffalo Bills announce 7 open training camp dates at St. John Fisher: Dates, times & ticket info",
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/17/buffalo-bills-announce-7-open-training-camp-dates-at-st-john-fisher-dates-times-ticket-info/"
+    },
+    {
+      "title": "Buffalo Bills training camp schedule includes fewer practices at St. John Fisher",
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/17/buffalo-bills-training-camp-schedule-includes-fewer-practices-at-st-john-fisher/"
+    },
+    {
+      "title": "Here comes the herd: First bison statue being installed outside of new Highmark Stadium",
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/17/here-comes-the-herd-first-bison-statue-being-installed-outside-of-new-highmark-stadium/"
+    },
+    {
+      "title": "Bills fans catch glimpse of first bison statue going up outside new Highmark Stadium",
+      "source": "WBEN (Audacy)",
+      "url": "https://www.audacy.com/wben/local-sports/bills/bills-fans-catch-glimpse-of-first-bison-statue-going-up-outside-new-highmark-stadium"
+    },
+    {
+      "title": "Next deal for Bills RG O'Cyrus Torrence directly impacted by Joe Tippman's extension",
+      "source": "Buffalo Rumblings",
+      "url": "https://www.buffalorumblings.com/buffalo-bills-salary-cap-contracts/135479/next-deal-for-bills-rg-ocyrus-torrence-directly-impacted-by-joe-tippmans-extension"
+    },
+    {
+      "title": "Josh Allen feels Bills had good spring",
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/17/josh-allen-feels-bills-had-good-spring/"
+    },
+    {
+      "title": "What are the burning Bills questions coming out of spring minicamps?",
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/17/what-are-the-burning-bills-questions-coming-out-of-spring-minicamps/"
+    },
+    {
+      "title": "Fracassi: Amid Super Bowl window chatter, we shouldn't forget the Bills already have championships",
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/17/fracassi-amid-super-bowl-window-chatter-we-shouldnt-forget-the-bills-already-have-championships/"
+    },
+    {
+      "title": "AFC East preview: Fresh look won't be enough for Miami Dolphins",
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/17/afc-east-preview-fresh-look-wont-be-enough-for-miami-dolphins/"
+    },
+    {
+      "title": "Legends plays off new stadium excitement as it works to fill game day jobs",
+      "source": "Two Bills Drive",
+      "url": "https://www.twobillsdrive.com/2026/06/17/legends-plays-off-new-stadium-excitement-as-it-works-to-fill-game-day-jobs/"
+    },
+    {
+      "title": "The Buffalo Bills have entered the quietest portion of the 2026 NFL season",
+      "source": "Buffalo Rumblings",
+      "url": "https://www.buffalorumblings.com/buffalo-bills-opinion/135457/the-buffalo-bills-have-entered-the-quietest-portion-of-the-2026-nfl-season"
+    },
+    {
+      "title": "Plays That Defined 2025: Patriots at Bills; Week 5",
+      "source": "Buffalo Rumblings",
+      "url": "https://www.buffalorumblings.com/buffalo-bills-analysis/135224/plays-that-defined-2025-patriots-at-bills-week-5"
+    },
+    {
+      "title": "91 Buffalo Bills players in 91 days: quarterback Shane Buechele",
+      "source": "Buffalo Rumblings",
+      "url": "https://www.buffalorumblings.com/buffalo-bills-discussion/135477/91-buffalo-bills-players-in-91-days-quarterback-shane-buechele"
+    },
+    {
+      "title": "91 Buffalo Bills players in 91 days: defensive tackle Zane Durant",
+      "source": "Buffalo Rumblings",
+      "url": "https://www.buffalorumblings.com/buffalo-bills-discussion/135462/91-buffalo-bills-players-in-91-days-defensive-tackle-zane-durant"
+    },
+    {
+      "title": "91 Buffalo Bills players in 91 days: G Nick Broeker",
+      "source": "Buffalo Rumblings",
+      "url": "https://www.buffalorumblings.com/buffalo-bills-analysis/135437/91-buffalo-bills-players-in-91-days-g-nick-broeker"
     }
   ],
-  "imageUrl": "https://www.audacy.com/media-library/2024-bills-training-camp.jpg?id=63626627&width=1200&height=600&coordinates=0%2C183%2C0%2C183"
+  "imageUrl": "https://static.clubs.nfl.com/image/upload/t_editorial_landscape_12_desktop/bills/fptuya3mtqjwwa3xx2op"
 }
