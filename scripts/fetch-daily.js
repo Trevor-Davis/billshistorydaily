@@ -58,8 +58,8 @@ const RSS_FEEDS = [
   { name: 'Buffalo Rumblings', url: 'https://www.buffalorumblings.com/rss/index.xml', loose: true },
   { name: 'Two Bills Drive',   url: 'https://www.twobillsdrive.com/rss', loose: true },
   { name: 'Buffalo Bills',     url: 'https://www.buffalobills.com/rss/news', loose: true },
-  { name: 'ESPN Bills',        url: 'https://www.espn.com/espn/rss/nfl/news', loose: true },
-  { name: 'NFL.com',           url: 'https://www.nfl.com/rss/rsslanding.html?tag=team-news-buf', loose: true },
+  { name: 'ESPN Bills',        url: 'https://www.espn.com/espn/rss/nfl/news', loose: true, filter: 'bills' },
+  { name: 'Pro Football Talk', url: 'https://profootballtalk.nbcsports.com/feed/', loose: true, filter: 'bills' },
 ];
 
 function extractText(xml, tag) {
@@ -155,6 +155,9 @@ async function fetchRssArticles(dateKey) {
           }
         }
 
+        // If feed has a filter keyword, only include matching articles
+        if (feed.filter && !title.toLowerCase().includes(feed.filter) &&
+            !url.toLowerCase().includes(feed.filter)) continue;
         articles.push({ title, source: feed.name, url });
         console.log(`  ✓ ${title.substring(0, 70)}`);
       }
