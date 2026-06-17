@@ -134,6 +134,9 @@ async function fetchRssArticles(dateKey) {
       const entryRe = /<entry[\s\S]*?<\/entry>/gi;
       const items   = [...(xml.match(itemRe) || []), ...(xml.match(entryRe) || [])];
       console.log(`  ${feed.name}: ${items.length} items in feed`);
+      if (items.length > 0 && (feed.name === 'ESPN Bills' || feed.name === 'Pro Football Talk')) {
+        console.log(`  DEBUG first item snippet: ${items[0].substring(0, 400)}`);
+      }
 
       for (const item of items) {
         const title = extractText(item, 'title');
