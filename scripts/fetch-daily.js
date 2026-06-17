@@ -61,52 +61,73 @@ const RSS_FEEDS = [
   { name: 'NFL.com Bills',     url: 'https://www.nfl.com/feeds/team/news/BUF' },
 ];
 
+function extractText(xml, tag) {
+  // Try CDATA first, then plain text
+  const cdataRe = new RegExp('<' + tag + '[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/' + tag + '>', 'i');
+  const plainRe  = new RegExp('<' + tag + '[^>]*>([\s\S]*?)<\/' + tag + '>', 'i');
+  const m = xml.match(cdataRe) || xml.match(plainRe);
+  return m ? m[1].replace(/<[^>]+>/g, '').trim() : null;
+}
+
+function extractLink(item) {
+  // Try href attribute (Atom)
+  let m = item.match(/<link[^>]+href=["']([^"']+)["']/i);
+  if (m) return m[1].trim();
+  // Try plain link tag (RSS)
+  m = item.match(/<link[^>]*>\s*(https?:\/\/[^\s<]+)/i);
+  if (m) return m[1].trim();
+  // Try guid as URL
+  m = item.match(/<guid[^>]*>(https?:\/\/[^<]+)<\/guid>/i);
+  if (m) return m[1].trim();
+  return null;
+}
+
 async function fetchRssArticles(dateKey) {
-  const targetDate = new Date(dateKey + 'T00:00:00');
-  const nextDate   = new Date(dateKey + 'T23:59:59');
+  const targetDate = new Date(dateKey + 'T00:00:00Z');
+  const nextDate   = new Date(dateKey + 'T23:59:59Z');
   const articles   = [];
 
   for (const feed of RSS_FEEDS) {
     try {
       console.log(`  Fetching RSS: ${feed.name}`);
       const res = await fetch(feed.url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BillsHistoryBot/1.0)' },
-        signal: AbortSignal.timeout(8000)
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; BillsHistoryBot/1.0)',
+          'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+        },
+        signal: AbortSignal.timeout(10000)
       });
       if (!res.ok) { console.log(`  ${feed.name}: HTTP ${res.status}`); continue; }
 
       const xml = await res.text();
+      console.log(`  ${feed.name}: got ${xml.length} chars`);
 
-      // Extract items from RSS/Atom feed
-      const itemMatches = xml.match(/<item[\s\S]*?<\/item>/gi) ||
-                          xml.match(/<entry[\s\S]*?<\/entry>/gi) || [];
+      // Split into items (RSS) or entries (Atom)
+      const itemRe = /<item[\s\S]*?<\/item>/gi;
+      const entryRe = /<entry[\s\S]*?<\/entry>/gi;
+      const items = [...(xml.match(itemRe) || []), ...(xml.match(entryRe) || [])];
+      console.log(`  ${feed.name}: ${items.length} items in feed`);
 
-      for (const item of itemMatches) {
-        // Get pub date
-        const dateMatch = item.match(/<pubDate>([\s\S]*?)<\/pubDate>/i) ||
-                          item.match(/<published>([\s\S]*?)<\/published>/i) ||
-                          item.match(/<updated>([\s\S]*?)<\/updated>/i);
-        if (!dateMatch) continue;
+      for (const item of items) {
+        const title = extractText(item, 'title');
+        const url   = extractLink(item);
+        if (!title || !url) continue;
 
-        const pubDate = new Date(dateMatch[1].trim());
-        if (isNaN(pubDate.getTime())) continue;
-        if (pubDate < targetDate || pubDate > nextDate) continue;
+        // Try to get date
+        const rawDate = extractText(item, 'pubDate') ||
+                        extractText(item, 'published') ||
+                        extractText(item, 'updated') ||
+                        extractText(item, 'dc:date');
 
-        // Get title
-        const titleMatch = item.match(/<title[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/title>/i) ||
-                           item.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-        if (!titleMatch) continue;
-        const title = titleMatch[1].replace(/<[^>]+>/g, '').trim();
-
-        // Get URL
-        const linkMatch = item.match(/<link[^>]*href=["']([\s\S]*?)["']/i) ||
-                          item.match(/<link[^>]*>([\s\S]*?)<\/link>/i);
-        const url = linkMatch ? linkMatch[1].trim() : '';
-
-        if (title && url) {
-          articles.push({ title, source: feed.name, url });
-          console.log(`  ✓ ${feed.name}: ${title.substring(0, 60)}`);
+        if (rawDate) {
+          const pubDate = new Date(rawDate);
+          if (!isNaN(pubDate.getTime())) {
+            if (pubDate < targetDate || pubDate > nextDate) continue;
+          }
         }
+
+        articles.push({ title, source: feed.name, url });
+        console.log(`  ✓ ${title.substring(0, 70)}`);
       }
     } catch(e) {
       console.log(`  ${feed.name} RSS failed: ${e.message}`);
