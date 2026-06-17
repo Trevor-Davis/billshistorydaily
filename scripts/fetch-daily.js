@@ -58,7 +58,9 @@ const RSS_FEEDS = [
   { name: 'Buffalo Rumblings', url: 'https://www.buffalorumblings.com/rss/index.xml', loose: true },
   { name: 'Two Bills Drive',   url: 'https://www.twobillsdrive.com/rss', loose: true },
   { name: 'Buffalo Bills',     url: 'https://www.buffalobills.com/rss/news', loose: true },
-  { name: 'ESPN Bills',        url: 'https://www.espn.com/espn/rss/nfl/news', loose: true, filter: ['bills', 'buffalo'] },
+  { name: 'WGR 550',           url: 'https://www.wgr550.com/feed/', loose: true, filter: ['bills', 'buffalo'] },
+  { name: 'WKBW Bills',        url: 'https://www.wkbw.com/sports/buffalo-bills/rss', loose: true },
+  { name: 'ESPN',              url: 'https://www.espn.com/espn/rss/nfl/news', loose: true, filter: ['bills', 'buffalo'] },
   { name: 'Pro Football Talk', url: 'https://profootballtalk.nbcsports.com/feed/', loose: true, filter: ['bills', 'buffalo'] },
 ];
 
@@ -134,10 +136,6 @@ async function fetchRssArticles(dateKey) {
       const entryRe = /<entry[\s\S]*?<\/entry>/gi;
       const items   = [...(xml.match(itemRe) || []), ...(xml.match(entryRe) || [])];
       console.log(`  ${feed.name}: ${items.length} items in feed`);
-      if (items.length > 0 && (feed.name === 'ESPN Bills' || feed.name === 'Pro Football Talk')) {
-        console.log(`  DEBUG first item snippet: ${items[0].substring(0, 400)}`);
-      }
-
       for (const item of items) {
         const title = extractText(item, 'title');
         const url   = extractLink(item);
