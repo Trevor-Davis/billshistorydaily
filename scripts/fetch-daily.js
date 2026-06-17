@@ -53,6 +53,70 @@ async function callAnthropic(messages, useSearch = false) {
   return tb.text;
 }
 
+// ── RSS feed fetching ────────────────────────────────────────────────────────
+const RSS_FEEDS = [
+  { name: 'Buffalo Rumblings', url: 'https://www.buffalorumblings.com/rss/current' },
+  { name: 'Two Bills Drive',   url: 'https://www.twobillsdrive.com/rss' },
+  { name: 'Buffalo News',      url: 'https://buffalonews.com/sports/bills/feed' },
+  { name: 'NFL.com Bills',     url: 'https://www.nfl.com/feeds/team/news/BUF' },
+];
+
+async function fetchRssArticles(dateKey) {
+  const targetDate = new Date(dateKey + 'T00:00:00');
+  const nextDate   = new Date(dateKey + 'T23:59:59');
+  const articles   = [];
+
+  for (const feed of RSS_FEEDS) {
+    try {
+      console.log(`  Fetching RSS: ${feed.name}`);
+      const res = await fetch(feed.url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BillsHistoryBot/1.0)' },
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!res.ok) { console.log(`  ${feed.name}: HTTP ${res.status}`); continue; }
+
+      const xml = await res.text();
+
+      // Extract items from RSS/Atom feed
+      const itemMatches = xml.match(/<item[\s\S]*?<\/item>/gi) ||
+                          xml.match(/<entry[\s\S]*?<\/entry>/gi) || [];
+
+      for (const item of itemMatches) {
+        // Get pub date
+        const dateMatch = item.match(/<pubDate>([\s\S]*?)<\/pubDate>/i) ||
+                          item.match(/<published>([\s\S]*?)<\/published>/i) ||
+                          item.match(/<updated>([\s\S]*?)<\/updated>/i);
+        if (!dateMatch) continue;
+
+        const pubDate = new Date(dateMatch[1].trim());
+        if (isNaN(pubDate.getTime())) continue;
+        if (pubDate < targetDate || pubDate > nextDate) continue;
+
+        // Get title
+        const titleMatch = item.match(/<title[^>]*><!\[CDATA\[([\s\S]*?)\]\]><\/title>/i) ||
+                           item.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+        if (!titleMatch) continue;
+        const title = titleMatch[1].replace(/<[^>]+>/g, '').trim();
+
+        // Get URL
+        const linkMatch = item.match(/<link[^>]*href=["']([\s\S]*?)["']/i) ||
+                          item.match(/<link[^>]*>([\s\S]*?)<\/link>/i);
+        const url = linkMatch ? linkMatch[1].trim() : '';
+
+        if (title && url) {
+          articles.push({ title, source: feed.name, url });
+          console.log(`  ✓ ${feed.name}: ${title.substring(0, 60)}`);
+        }
+      }
+    } catch(e) {
+      console.log(`  ${feed.name} RSS failed: ${e.message}`);
+    }
+  }
+
+  console.log(`RSS total: ${articles.length} articles found`);
+  return articles;
+}
+
 // ── Extract og:image from an article URL ─────────────────────────────────────
 async function extractOgImage(url) {
   if (!url) return null;
@@ -93,18 +157,50 @@ async function extractOgImage(url) {
 async function fetchDailyData(dateKey) {
   const readable = readableDate(dateKey);
 
-  // Step 1: Search for news (free-form)
-  console.log('Step 1: Searching for Bills news...');
-  const searchResult = await callAnthropic([{
+  // Step 1: Fetch RSS feeds first (fastest and most reliable)
+  console.log('Step 1: Fetching RSS feeds...');
+  const rssArticles = await fetchRssArticles(dateKey);
+  const rssText = rssArticles.length > 0
+    ? 'RSS FEED ARTICLES:\n' + rssArticles.map(a => `- ${a.title} (${a.source}) ${a.url}`).join('\n')
+    : 'No RSS articles found for this date.';
+
+  // Step 2: Search targeted Bills sites first, then general web
+  console.log('Step 2: Searching Bills-specific sites...');
+
+  const targetedSites = [
+    'site:buffalobills.com',
+    'site:buffalorumblings.com',
+    'site:buffalonews.com',
+    'site:twobillsdrive.com',
+    'site:si.com/nfl/bills',
+    'site:espn.com buffalo bills',
+    'site:nfl.com buffalo bills',
+    'site:profootballtalk.nbcsports.com buffalo bills',
+  ];
+
+  const targetedQuery = `Buffalo Bills ${readable} (${targetedSites.join(' OR ')})`;
+
+  const targetedResult = await callAnthropic([{
     role: 'user',
-    content: `Search the web for Buffalo Bills NFL news and articles from ${readable}. 
-Find as many relevant articles as possible. For each article note the title, source, and URL.
-Also note the main topics/themes of the day's coverage.
-Write a brief summary of what you found.`
+    content: `Search for Buffalo Bills NFL news from ${readable} on these specific sites: buffalobills.com, buffalorumblings.com, buffalonews.com, twobillsdrive.com, si.com, espn.com, nfl.com, profootballtalk.nbcsports.com.
+
+For each article you find, note the title, source site, and full URL.
+Write a summary of what you found on these sites.`
   }], true);
 
-  // Step 2: Format as JSON
-  console.log('Step 2: Formatting as JSON...');
+  // Step 2b: General web search to catch anything missed
+  console.log('Step 2b: Expanding to general web search...');
+  const generalResult = await callAnthropic([{
+    role: 'user',
+    content: `Search the web broadly for any additional Buffalo Bills NFL news and articles from ${readable} that weren't already covered.
+Focus on finding articles not from these sites (already searched): buffalobills.com, buffalorumblings.com, buffalonews.com, twobillsdrive.com, si.com, espn.com, nfl.com, profootballtalk.nbcsports.com.
+For each article found, note the title, source, and URL.`
+  }], true);
+
+  const searchResult = `${rssText}\n\nTARGETED SITE RESULTS:\n${targetedResult}\n\nGENERAL WEB RESULTS:\n${generalResult}`;
+
+  // Step 3: Format as JSON
+  console.log('Step 3: Formatting as JSON...');
   const jsonResult = await callAnthropic([{
     role: 'user',
     content: `Here is a summary of Buffalo Bills news from ${readable}:
@@ -137,7 +233,16 @@ Respond with ONLY the JSON object. No other text.`
     throw new Error('Missing required fields: ' + JSON.stringify(parsed));
   }
 
-  // Step 3: Try to extract og:image from each article
+  // Merge in any RSS articles not already in the list
+  const existingUrls = new Set(parsed.articles.map(a => a.url));
+  for (const a of rssArticles) {
+    if (!existingUrls.has(a.url)) {
+      parsed.articles.push(a);
+      existingUrls.add(a.url);
+    }
+  }
+
+  // Step 4: Try to extract og:image from each article
   console.log('Step 3: Looking for article image...');
   let imageUrl = '';
   for (const article of parsed.articles) {
