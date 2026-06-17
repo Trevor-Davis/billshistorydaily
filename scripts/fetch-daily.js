@@ -56,9 +56,9 @@ async function callAnthropic(messages, useSearch = false) {
 // ── RSS feed fetching ────────────────────────────────────────────────────────
 const RSS_FEEDS = [
   { name: 'Buffalo Rumblings', url: 'https://www.buffalorumblings.com/rss/index.xml' },
-  { name: 'Two Bills Drive',   url: 'https://www.twobillsdrive.com/rss' },
-  { name: 'Buffalo News',      url: 'https://buffalonews.com/search/?f=rss&t=article&c=sports/football/nfl/buffalo_bills&l=50&s=start_time&sd=desc' },
-  { name: 'Bills Wire',        url: 'https://billswire.usatoday.com/feed/' },
+  { name: 'Two Bills Drive',   url: 'https://www.twobillsdrive.com/rss', loose: true },
+  { name: 'Buffalo News',      url: 'https://buffalonews.com/tag/buffalo-bills/feed/' },
+  { name: 'Bills Wire',        url: 'https://billswire.usatoday.com/wp-json/wp/v2/posts?per_page=20&_fields=title,link,date&categories=1', json: true },
 ];
 
 function extractText(xml, tag) {
@@ -102,19 +102,36 @@ async function fetchRssArticles(dateKey) {
       const res = await fetch(feed.url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (compatible; BillsHistoryBot/1.0)',
-          'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+          'Accept': 'application/rss+xml, application/xml, text/xml, application/json, */*'
         },
         signal: AbortSignal.timeout(10000)
       });
       if (!res.ok) { console.log(`  ${feed.name}: HTTP ${res.status}`); continue; }
 
+      // Handle JSON feeds (e.g. WordPress REST API)
+      if (feed.json) {
+        const posts = await res.json();
+        console.log(`  ${feed.name}: ${posts.length} posts`);
+        for (const post of posts) {
+          const pubDate = new Date(post.date);
+          if (isNaN(pubDate.getTime())) continue;
+          if (pubDate < targetDate || pubDate > nextDate) continue;
+          const title = post.title?.rendered?.replace(/<[^>]+>/g,'').trim() || post.title;
+          const url   = post.link;
+          if (title && url) {
+            articles.push({ title, source: feed.name, url });
+            console.log(`  ✓ ${title.substring(0, 70)}`);
+          }
+        }
+        continue;
+      }
+
       const xml = await res.text();
       console.log(`  ${feed.name}: got ${xml.length} chars`);
 
-      // Split into items (RSS) or entries (Atom)
-      const itemRe = /<item[\s\S]*?<\/item>/gi;
+      const itemRe  = /<item[\s\S]*?<\/item>/gi;
       const entryRe = /<entry[\s\S]*?<\/entry>/gi;
-      const items = [...(xml.match(itemRe) || []), ...(xml.match(entryRe) || [])];
+      const items   = [...(xml.match(itemRe) || []), ...(xml.match(entryRe) || [])];
       console.log(`  ${feed.name}: ${items.length} items in feed`);
 
       for (const item of items) {
@@ -122,7 +139,6 @@ async function fetchRssArticles(dateKey) {
         const url   = extractLink(item);
         if (!title || !url) continue;
 
-        // Try to get date
         const rawDate = extractText(item, 'pubDate') ||
                         extractText(item, 'published') ||
                         extractText(item, 'updated') ||
@@ -131,7 +147,10 @@ async function fetchRssArticles(dateKey) {
         if (rawDate) {
           const pubDate = new Date(rawDate);
           if (!isNaN(pubDate.getTime())) {
-            if (pubDate < targetDate || pubDate > nextDate) continue;
+            // loose: accept if within 2 days (for feeds with timezone issues)
+            const slack = feed.loose ? 2 * 24 * 60 * 60 * 1000 : 0;
+            if (pubDate < new Date(targetDate.getTime() - slack) ||
+                pubDate > new Date(nextDate.getTime() + slack)) continue;
           }
         }
 
