@@ -325,6 +325,7 @@ const NAV_PAGES = [
   {id:'home',label:'Daily Archive'},
   {id:'schedule',label:'2026 Schedule'},
   {id:'creators',label:'Content Creators'},
+  {id:'pickdate',label:'📅 Pick a Date'},
 ];
 
 function NavBar({page, onNav}) {
@@ -441,37 +442,7 @@ function HomePage({onDaySelect}) {
 
   return (
     <main className="container">
-      <div className="toolbar">
-        <button className={`tool-btn${calOpen?' active':''}`} onClick={()=>setCalOpen(o=>!o)}>
-          📅 {calOpen?'Close Calendar':'Pick a Date'}
-        </button>
-      </div>
 
-      {calOpen && (
-        <div className="cal-popover">
-          <div className="cal-nav">
-            <button className="cal-nav-btn" onClick={prevMonth}>‹</button>
-            <span className="cal-month-label">{calMonthLabel}</span>
-            <button className="cal-nav-btn" onClick={nextMonth} style={{opacity:nextMonthFuture?0.3:1,cursor:nextMonthFuture?'not-allowed':'pointer'}} disabled={nextMonthFuture}>›</button>
-          </div>
-          <div className="cal-grid" style={{marginTop:10}}>
-            <div className="cal-dow-row">{DOW.map(d=><div key={d} className="cal-dow">{d}</div>)}</div>
-            <div className="cal-days">
-              {cells.map((cell,ci)=>{
-                const cd=new Date(cell.year,cell.month,cell.day,12,0,0);
-                const ck=dateKey(cd);
-                let cls='cal-day';
-                if(!cell.current) cls+=' other-month';
-                if(cd>today) cls+=' future';
-                if(ck===todayKey) cls+=' today';
-                if(ck===pickedKey) cls+=' selected';
-                if(availableKeys.has(ck)&&ck!==pickedKey) cls+=' has-data';
-                return <div key={ci} className={cls} onClick={()=>handleCalPick(cell)}>{cell.day}</div>;
-              })}
-            </div>
-          </div>
-        </div>
-      )}
 
       {pickedKey && !(index.dates||[]).includes(pickedKey) && (
         <div className="spotlight-banner">
@@ -692,6 +663,66 @@ function ContentCreatorsPage() {
   );
 }
 
+// ── PICK A DATE PAGE ─────────────────────────────────────────────────────────
+function PickDatePage({onDaySelect}) {
+  const today = new Date(); today.setHours(12,0,0,0);
+  const [calYear, setCalYear] = useState(today.getFullYear());
+  const [calMonth, setCalMonth] = useState(today.getMonth());
+  const [index, setIndex] = useState({dates:[]});
+
+  useEffect(()=>{ loadIndex().then(setIndex); },[]);
+
+  function prevMonth(){if(calMonth===0){setCalYear(y=>y-1);setCalMonth(11);}else setCalMonth(m=>m-1);}
+  function nextMonth(){const nd=new Date(calYear,calMonth+1,1);if(nd>today)return;if(calMonth===11){setCalYear(y=>y+1);setCalMonth(0);}else setCalMonth(m=>m+1);}
+
+  const cells = buildCalGrid(calYear, calMonth);
+  const todayKey = dateKey(today);
+  const calMonthLabel = new Date(calYear,calMonth,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const nextMonthFuture = new Date(calYear,calMonth+1,1)>today;
+  const availableKeys = new Set(index.dates||[]);
+
+  function handlePick(cell) {
+    const d = new Date(cell.year,cell.month,cell.day,12,0,0);
+    if(d>today) return;
+    onDaySelect(dateKey(d));
+  }
+
+  return (
+    <main className="container">
+      <div className="themed-hero">
+        <div className="themed-hero-label">Buffalo Bills · Archive</div>
+        <div className="themed-hero-title">Pick a Date</div>
+        <div className="themed-hero-sub">Browse Bills history by selecting any date</div>
+      </div>
+      <div style={{maxWidth:320}}>
+        <div className="cal-nav" style={{marginBottom:10}}>
+          <button className="cal-nav-btn" onClick={prevMonth}>‹</button>
+          <span className="cal-month-label">{calMonthLabel}</span>
+          <button className="cal-nav-btn" onClick={nextMonth} style={{opacity:nextMonthFuture?0.3:1,cursor:nextMonthFuture?'not-allowed':'pointer'}} disabled={nextMonthFuture}>›</button>
+        </div>
+        <div className="cal-grid" style={{border:`1px solid ${BORDER}`,borderRadius:6,padding:14,boxShadow:'0 2px 12px rgba(0,0,0,0.06)'}}>
+          <div className="cal-dow-row">{DOW.map(d=><div key={d} className="cal-dow">{d}</div>)}</div>
+          <div className="cal-days">
+            {cells.map((cell,ci)=>{
+              const cd=new Date(cell.year,cell.month,cell.day,12,0,0);
+              const ck=dateKey(cd);
+              let cls='cal-day';
+              if(!cell.current) cls+=' other-month';
+              if(cd>today) cls+=' future';
+              if(ck===todayKey) cls+=' today';
+              if(availableKeys.has(ck)) cls+=' has-data';
+              return <div key={ci} className={cls} onClick={()=>handlePick(cell)}>{cell.day}</div>;
+            })}
+          </div>
+        </div>
+        <div style={{fontSize:11,color:MUTED,marginTop:12,letterSpacing:'1px'}}>
+          🔵 Blue dot = archived coverage available
+        </div>
+      </div>
+    </main>
+  );
+}
+
 // ── SCHEDULE PAGE ─────────────────────────────────────────────────────────────
 function SchedulePage() {
   return (
@@ -740,7 +771,7 @@ export default function App() {
   function goSearch(q) { if(!q){setPage('home');return;} setSearchQuery(q); setPage('search'); window.scrollTo(0,0); }
   function goNav(id) { setPage(id); window.scrollTo(0,0); }
 
-  const navPage = ['home','schedule','creators'].includes(page)?page:'home';
+  const navPage = ['home','schedule','creators','pickdate'].includes(page)?page:'home';
 
   return (
     <>
@@ -752,6 +783,7 @@ export default function App() {
       {page==='search'   && <SearchPage query={searchQuery} onDaySelect={goToDay} onBack={goHome}/>}
       {page==='schedule' && <SchedulePage/>}
       {page==='creators' && <ContentCreatorsPage/>}
+      {page==='pickdate' && <PickDatePage onDaySelect={goToDay}/>}
     </>
   );
 }
