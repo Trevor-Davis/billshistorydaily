@@ -286,7 +286,30 @@ Respond with ONLY the JSON object. No other text.`
   const jsonMatch = jsonResult.match(/\{[\s\S]*\}/);
   if (!jsonMatch) throw new Error('No JSON in response: ' + jsonResult.substring(0, 200));
 
-  const parsed = JSON.parse(jsonMatch[0]);
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch(parseErr) {
+    // Try to fix common JSON issues - truncated arrays, trailing commas
+    let fixed = jsonMatch[0]
+      .replace(/,\s*}/g, '}')          // trailing comma before }
+      .replace(/,\s*]/g, ']')          // trailing comma before ]
+      .replace(/[\x00-\x1F\x7F]/g, ' '); // control characters
+    // If still broken, truncate at last clean article
+    try {
+      parsed = JSON.parse(fixed);
+    } catch(e2) {
+      // Find last complete article and close the JSON
+      const lastGood = fixed.lastIndexOf('"}');
+      if (lastGood > 0) {
+        fixed = fixed.substring(0, lastGood + 2) + ']}';
+        try { parsed = JSON.parse(fixed); }
+        catch(e3) { throw new Error('Could not parse JSON: ' + parseErr.message); }
+      } else {
+        throw new Error('Could not parse JSON: ' + parseErr.message);
+      }
+    }
+  }
   if (!parsed.themes || !parsed.writeup || !parsed.articles) {
     throw new Error('Missing required fields: ' + JSON.stringify(parsed));
   }
