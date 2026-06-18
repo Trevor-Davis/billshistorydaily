@@ -26,7 +26,7 @@ function readableDate(key) {
 async function callAnthropic(messages, useSearch = false) {
   const body = {
     model: 'claude-sonnet-4-6',
-    max_tokens: 2000,
+    max_tokens: 4000,
     messages
   };
   if (useSearch) {
@@ -259,11 +259,18 @@ For each article found, note the title, source, and URL.`
 
   // Step 3: Format as JSON
   console.log('Step 3: Formatting as JSON...');
+
+  // Limit combined content to avoid truncation
+  const maxChars = 8000;
+  const trimmedSearch = searchResult.length > maxChars
+    ? searchResult.substring(0, maxChars) + '\n[...truncated]'
+    : searchResult;
+
   const jsonResult = await callAnthropic([{
     role: 'user',
     content: `Here is a summary of Buffalo Bills news from ${readable}:
 
-${searchResult}
+${trimmedSearch}
 
 Convert this into a JSON object with exactly this structure:
 {
