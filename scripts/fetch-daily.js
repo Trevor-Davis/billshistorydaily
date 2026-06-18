@@ -58,6 +58,7 @@ const RSS_FEEDS = [
   { name: 'Buffalo Rumblings', url: 'https://www.buffalorumblings.com/rss/index.xml', loose: true },
   { name: 'Two Bills Drive',   url: 'https://www.twobillsdrive.com/rss', loose: true },
   { name: 'Buffalo Bills',     url: 'https://www.buffalobills.com/rss/news', loose: true },
+  { name: 'Banged Up Bills',   url: 'https://bangedupbills.com/feed', loose: true },
   { name: 'WGR 550',           url: 'https://www.wgr550.com/feed/', loose: true, filter: ['bills', 'buffalo'] },
   { name: 'WKBW Bills',        url: 'https://www.wkbw.com/sports/buffalo-bills/rss', loose: true },
   { name: 'ESPN',              url: 'https://www.espn.com/espn/rss/nfl/news', loose: true, filter: ['bills', 'buffalo'] },
