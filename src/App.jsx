@@ -146,6 +146,20 @@ const style = `
   .themed-loading { display:flex; align-items:center; gap:12px; font-size:14px; color:${MUTED}; padding:40px 0; font-style:italic; }
   .themed-error { font-size:14px; color:${RED}; padding:20px 0; font-style:italic; }
 
+  /* Creator cards */
+  .creators-list { display:flex; flex-direction:column; gap:24px; }
+  .creator-card { display:flex; gap:24px; align-items:flex-start; padding:24px; border:1px solid ${BORDER}; border-radius:8px; background:${BG}; transition:box-shadow 0.15s,border-color 0.15s; }
+  .creator-card:hover { border-color:${BLUE}; box-shadow:0 4px 16px rgba(0,51,141,0.08); }
+  .creator-photo-wrap { flex-shrink:0; }
+  .creator-photo { width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid ${BLUE}; display:block; }
+  .creator-photo-placeholder { width:90px; height:90px; border-radius:50%; background:${BLUE}; color:#fff; font-family:'Playfair Display',serif; font-size:36px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .creator-info { flex:1; min-width:0; }
+  .creator-name { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:${BLUE}; margin-bottom:2px; }
+  .creator-handle { font-size:12px; color:${MUTED}; letter-spacing:1px; margin-bottom:4px; }
+  .creator-type { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:${RED}; font-weight:600; margin-bottom:10px; }
+  .creator-bio { font-size:14px; line-height:1.7; color:${TEXT}; font-weight:300; margin-bottom:14px; }
+  .creator-links { display:flex; flex-wrap:wrap; gap:8px; }
+
   .sched-hero { border-bottom:1px solid ${BORDER}; padding-bottom:20px; margin-bottom:28px; }
   .sched-hero-label { font-size:10px; letter-spacing:4px; text-transform:uppercase; color:${RED}; font-weight:600; margin-bottom:8px; }
   .sched-hero-title { font-family:'Playfair Display',serif; font-size:36px; font-weight:900; color:${BLUE}; line-height:1.1; }
@@ -323,6 +337,8 @@ const SCHEDULE_2026 = [
 // ── NAV ───────────────────────────────────────────────────────────────────────
 const NAV_PAGES = [
   {id:'home',label:'Daily Archive'},
+  {id:'players',label:'All-Time Players'},
+  {id:'draft',label:'Draft History'},
   {id:'schedule',label:'2026 Schedule'},
   {id:'creators',label:'Content Creators'},
   {id:'pickdate',label:'📅 Pick a Date'},
@@ -623,42 +639,71 @@ function SearchPage({query, onDaySelect, onBack}) {
   );
 }
 
+// ── CONTENT CREATORS DATA ─────────────────────────────────────────────────────
+const CREATORS = [
+  {
+    name: 'Cover 1',
+    handle: '@Cover1Sports',
+    photo: 'https://cover1.net/wp-content/uploads/2020/10/Cover1-Logo-Social.jpg',
+    type: 'Podcast · YouTube · Website',
+    bio: 'A Buffalo Bills podcast hosted by Aaron Quinn and Greg Tompsett, with additional coverage from Anthony Prohaska and the broader Cover 1 team. Known for film breakdowns, game previews and postgame analysis, draft coverage, and making the complexities of football more accessible to Bills fans.',
+    links: [
+      { label: 'Website', url: 'https://www.cover1.net/' },
+      { label: 'YouTube', url: 'https://www.youtube.com/cover1' },
+      { label: 'Podcast', url: 'https://podcasts.apple.com/us/podcast/cover-1-buffalo/id1370118411' },
+      { label: 'Spotify', url: 'https://open.spotify.com/show/4OMyjqhag5OFRq6utD1iva' },
+    ]
+  },
+  {
+    name: 'Joe Marino',
+    handle: '@TheJoeMarino',
+    photo: 'https://lockedonpodcasts.com/wp-content/uploads/2022/08/Joe-Marino-Headshot.jpg',
+    type: 'Podcast · YouTube · Substack',
+    bio: 'Host of the Locked On Bills daily podcast, Locked On NFL Scouting, and First Read. Delivers expert local analysis, film breakdowns, and insider Bills coverage 365 days a year. Author of Go Bills! and Buffalo's Run.',
+    links: [
+      { label: 'Podcast', url: 'https://lockedonpodcasts.com/podcasts/locked-on-bills/' },
+      { label: 'YouTube', url: 'https://www.youtube.com/channel/UCB53sJjGaYU8RmLV9F9wPvQ' },
+      { label: 'Substack', url: 'https://substack.com/@thejoemarino' },
+      { label: 'Website', url: 'https://www.thejoemarino.com/' },
+    ]
+  },
+];
+
 // ── CONTENT CREATORS PAGE ─────────────────────────────────────────────────────
 function ContentCreatorsPage() {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  async function load() {
-    setLoading(true); setError(null);
-    try { setData(await fetchThemedPage('creators')); }
-    catch(e) { setError(e.message); }
-    finally { setLoading(false); }
-  }
-  useEffect(()=>{load();},[]);
   return (
     <main className="container">
       <div className="themed-hero">
         <div className="themed-hero-label">Bills Nation · Community</div>
         <div className="themed-hero-title">Bills Content Creators</div>
-        <div className="themed-hero-sub">YouTubers, podcasters, bloggers &amp; social voices covering the Bills</div>
+        <div className="themed-hero-sub">The voices of Bills Mafia — podcasters, analysts &amp; storytellers covering the Buffalo Bills</div>
       </div>
-      {loading&&<div className="themed-loading"><div className="spinner"/>Finding Bills creators…</div>}
-      {error&&<div><div className="themed-error">Failed to load: {error}</div><button className="detail-refresh" onClick={load}>↻ Retry</button></div>}
-      {data&&!loading&&(
-        <div className="card-grid">
-          {(data.creators||[]).map((c,i)=>(
-            <div key={i} className="card">
-              {c.platform&&<span className="card-tag">{c.platform}</span>}
-              <div className="card-name" style={{marginTop:8}}>{c.name}</div>
-              {c.handle&&<div className="card-position">{c.handle}</div>}
-              <div className="card-bio">{c.bio}</div>
-              <div className="card-links">
-                {c.url&&<a className="card-link" href={c.url} target="_blank" rel="noopener noreferrer">Visit →</a>}
+      <div className="creators-list">
+        {CREATORS.sort((a,b)=>a.name.localeCompare(b.name)).map((c,i)=>(
+          <div key={i} className="creator-card">
+            <div className="creator-photo-wrap">
+              {c.photo
+                ? <img className="creator-photo" src={c.photo} alt={c.name} onError={e=>{e.target.style.display='none';e.target.nextSibling.style.display='flex';}} />
+                : null
+              }
+              <div className="creator-photo-placeholder" style={{display:c.photo?'none':'flex'}}>
+                {c.name.charAt(0)}
               </div>
             </div>
-          ))}
-        </div>
-      )}
+            <div className="creator-info">
+              <div className="creator-name">{c.name}</div>
+              {c.handle && <div className="creator-handle">{c.handle}</div>}
+              <div className="creator-type">{c.type}</div>
+              <div className="creator-bio">{c.bio}</div>
+              <div className="creator-links">
+                {c.links.map((l,li)=>(
+                  <a key={li} className="card-link" href={l.url} target="_blank" rel="noopener noreferrer">{l.label} →</a>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </main>
   );
 }
@@ -723,6 +768,330 @@ function PickDatePage({onDaySelect}) {
   );
 }
 
+// ── PLAYERS PAGE ──────────────────────────────────────────────────────────────
+const DECADES = ['2020s','2010s','2000s','1990s','1980s','1970s','1960s'];
+
+const PLAYERS_BY_DECADE = {
+  '2020s': [
+    // Offense
+    {name:'Josh Allen',pos:'QB',years:'2018–present'},
+    {name:'James Cook',pos:'RB',years:'2022–present'},
+    {name:'Ray Davis',pos:'RB',years:'2024–present'},
+    {name:'Ty Johnson',pos:'RB',years:'2023–present'},
+    {name:'Khalil Shakir',pos:'WR',years:'2022–present'},
+    {name:'Keon Coleman',pos:'WR',years:'2024–present'},
+    {name:'DJ Moore',pos:'WR',years:'2026–present'},
+    {name:'Joshua Palmer',pos:'WR',years:'2024–present'},
+    {name:'Mack Hollins',pos:'WR',years:'2023–present'},
+    {name:'Skyler Bell',pos:'WR',years:'2026–present'},
+    {name:'Dalton Kincaid',pos:'TE',years:'2023–present'},
+    {name:'Dawson Knox',pos:'TE',years:'2019–present'},
+    {name:'Dion Dawkins',pos:'OT',years:'2017–present'},
+    {name:'Spencer Brown',pos:'OT',years:'2021–present'},
+    {name:'David Edwards',pos:'OG',years:'2024–present'},
+    {name:'O'Cyrus Torrence',pos:'OG',years:'2023–present'},
+    {name:'Connor McGovern',pos:'C',years:'2022–present'},
+    // Defense
+    {name:'Greg Rousseau',pos:'DE',years:'2021–present'},
+    {name:'A.J. Epenesa',pos:'DE',years:'2020–present'},
+    {name:'TJ Parker',pos:'DE',years:'2026–present'},
+    {name:'Ed Oliver',pos:'DT',years:'2019–present'},
+    {name:'Deone Walker',pos:'DT',years:'2025–present'},
+    {name:'Matt Milano',pos:'LB',years:'2017–present'},
+    {name:'Dorian Williams',pos:'LB',years:'2023–present'},
+    {name:'Baylon Spector',pos:'LB',years:'2022–present'},
+    {name:'Christian Benford',pos:'CB',years:'2022–present'},
+    {name:'Tre'Davious White',pos:'CB',years:'2017–present'},
+    {name:'Maxwell Hairston',pos:'CB',years:'2024–present'},
+    {name:'Davison Igbinosun',pos:'CB',years:'2026–present'},
+    {name:'Damar Hamlin',pos:'S',years:'2021–present'},
+    {name:'Cole Bishop',pos:'S',years:'2024–present'},
+    {name:'Taylor Rapp',pos:'S',years:'2023–present'},
+    {name:'Micah Hyde',pos:'S',years:'2017–2023'},
+    {name:'Jordan Poyer',pos:'S',years:'2017–2022'},
+    {name:'Stefon Diggs',pos:'WR',years:'2020–2023'},
+    {name:'Isaiah McKenzie',pos:'WR',years:'2018–2022'},
+    {name:'Cole Beasley',pos:'WR',years:'2019–2022'},
+    {name:'Gabriel Davis',pos:'WR',years:'2020–2023'},
+    {name:'Von Miller',pos:'DE',years:'2022–2023'},
+    {name:'Shaq Lawson',pos:'DE',years:'2016–2019,2021'},
+    {name:'Tremaine Edmunds',pos:'LB',years:'2018–2022'},
+    {name:'Devin Singletary',pos:'RB',years:'2019–2022'},
+    {name:'Zack Moss',pos:'RB',years:'2020–2021'},
+    {name:'Mitchell Trubisky',pos:'QB',years:'2022'},
+    {name:'Case Keenum',pos:'QB',years:'2021'},
+    // Special teams
+    {name:'Tyler Bass',pos:'K',years:'2020–present'},
+    {name:'Sam Martin',pos:'P',years:'2021–2023'},
+    {name:'Taron Johnson',pos:'CB',years:'2018–present'},
+    {name:'Myles Garrett',pos:'DE',years:'2026–present'},
+    {name:'Bradley Chubb',pos:'DE',years:'2025–present'},
+  ],
+};
+
+const playerPageStyles = `
+  .players-decade-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px; }
+  .decade-tab { padding:8px 18px; font-size:11px; letter-spacing:2px; text-transform:uppercase;
+    font-family:'Source Serif 4',serif; font-weight:600; border:1px solid ${BORDER};
+    border-radius:3px; cursor:pointer; background:${BG}; color:${BLUE};
+    transition:background 0.15s,color 0.15s,border-color 0.15s; }
+  .decade-tab:hover { background:${BG_ALT}; border-color:${BLUE}; }
+  .decade-tab.active { background:${BLUE}; color:#fff; border-color:${BLUE}; }
+  .players-search { width:100%; padding:10px 14px; font-size:14px; font-family:'Source Serif 4',serif;
+    border:1px solid ${BORDER}; border-radius:4px; outline:none; margin-bottom:8px; color:${TEXT}; }
+  .players-search:focus { border-color:${BLUE}; box-shadow:0 0 0 2px rgba(0,51,141,0.1); }
+  .players-count { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${MUTED}; margin-bottom:20px; }
+  .players-table { width:100%; border-collapse:collapse; }
+  .players-table th { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:${MUTED};
+    font-weight:600; padding:8px 12px; text-align:left; border-bottom:2px solid ${BLUE}; }
+  .players-table tr { border-bottom:1px solid ${BORDER}; transition:background 0.12s; }
+  .players-table tr:hover { background:#f0f4ff; }
+  .players-table td { padding:11px 12px; font-size:14px; color:${TEXT}; }
+  .player-name-cell { font-weight:600; color:${BLUE}; }
+  .player-pos-badge { display:inline-block; font-size:9px; letter-spacing:1.5px; text-transform:uppercase;
+    color:${RED}; font-weight:700; border:1px solid rgba(198,12,48,0.3); border-radius:2px;
+    padding:2px 6px; background:rgba(198,12,48,0.05); }
+  .players-coming-soon { font-size:14px; color:${MUTED}; font-style:italic; padding:32px 0; text-align:center; }
+`;
+
+function PlayersPage() {
+  const [decade, setDecade] = useState('2020s');
+  const [search, setSearch] = useState('');
+
+  const allPlayers = PLAYERS_BY_DECADE[decade] || [];
+  const filtered = search
+    ? allPlayers.filter(p =>
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.pos.toLowerCase().includes(search.toLowerCase()))
+    : allPlayers;
+
+  const sorted = [...filtered].sort((a,b) => a.name.localeCompare(b.name));
+
+  return (
+    <main className="container">
+      <style>{playerPageStyles}</style>
+      <div className="themed-hero">
+        <div className="themed-hero-label">Buffalo Bills · 1960–Present</div>
+        <div className="themed-hero-title">All-Time Players</div>
+        <div className="themed-hero-sub">Browse every era of Bills football — full roster data coming soon for past decades</div>
+      </div>
+
+      <div className="players-decade-tabs">
+        {DECADES.map(d=>(
+          <button key={d} className={'decade-tab'+(decade===d?' active':'')}
+            onClick={()=>{ setDecade(d); setSearch(''); }}>
+            {d}
+          </button>
+        ))}
+      </div>
+
+      {PLAYERS_BY_DECADE[decade] ? (
+        <>
+          <input className="players-search" placeholder="Filter by name or position…"
+            value={search} onChange={e=>setSearch(e.target.value)} />
+          <div className="players-count">{sorted.length} player{sorted.length!==1?'s':''}</div>
+          <table className="players-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Years with Bills</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((p,i)=>(
+                <tr key={i}>
+                  <td className="player-name-cell">{p.name}</td>
+                  <td><span className="player-pos-badge">{p.pos}</span></td>
+                  <td style={{color:MUTED,fontSize:13}}>{p.years}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      ) : (
+        <div className="players-coming-soon">
+          📋 Roster data for the {decade} is coming soon.<br/>
+          <span style={{fontSize:12,marginTop:8,display:'block'}}>Full historical rosters will be added for all decades.</span>
+        </div>
+      )}
+    </main>
+  );
+}
+
+// ── DRAFT HISTORY PAGE ───────────────────────────────────────────────────────
+const DRAFT_HISTORY = [
+  // 2026
+  {year:2026,round:1,pick:28,name:'TJ Parker',pos:'DE',college:'Clemson',years:'2026–present'},
+  {year:2026,round:2,pick:60,name:'Dillon Gabriel',pos:'QB',college:'Oregon',years:'2026–present'},
+  {year:2026,round:3,pick:91,name:'Richmond Vona',pos:'OT',college:'Oregon',years:'2026–present'},
+  {year:2026,round:4,pick:125,name:'Skyler Bell',pos:'WR',college:'UConn',years:'2026–present'},
+  {year:2026,round:5,pick:165,name:'Kaleb Elarms-Orr',pos:'LB',college:'Texas A&M',years:'2026–present'},
+  {year:2026,round:5,pick:168,name:'Jalon Kilgore',pos:'S',college:'Appalachian State',years:'2026–present'},
+  {year:2026,round:6,pick:182,name:'Zane Durant',pos:'DT',college:'Penn State',years:'2026–present'},
+  {year:2026,round:6,pick:189,name:'Jude Bowry',pos:'OT',college:'Boston College',years:'2026–present'},
+  {year:2026,round:7,pick:220,name:'Toriano Pride Jr.',pos:'CB',college:'Missouri',years:'2026–present'},
+  {year:2026,round:7,pick:237,name:'Tommy Doman',pos:'P',college:'Temple',years:'2026–present'},
+  {year:2026,round:7,pick:243,name:'Ar'maj Reed-Adams',pos:'OG',college:'Tennessee',years:'2026–present'},
+  // 2025
+  {year:2025,round:1,pick:30,name:'Maxwell Hairston',pos:'CB',college:'Kentucky',years:'2025–present'},
+  {year:2025,round:2,pick:48,name:'Deone Walker',pos:'DT',college:'Michigan',years:'2025–present'},
+  {year:2025,round:3,pick:79,name:'Cole Bishop',pos:'S',college:'Utah',years:'2025–present'},
+  {year:2025,round:4,pick:115,name:'Tylan Grable',pos:'OG',college:'Central Florida',years:'2025–present'},
+  {year:2025,round:5,pick:154,name:'Dorian Strong',pos:'CB',college:'Virginia Tech',years:'2025–present'},
+  {year:2025,round:6,pick:195,name:'Zach Bookman',pos:'DE',college:'Duke',years:'2025–present'},
+  {year:2025,round:7,pick:231,name:'Desmond Reid',pos:'RB',college:'Pittsburgh',years:'2025–present'},
+  // 2024
+  {year:2024,round:1,pick:28,name:'Keon Coleman',pos:'WR',college:'Florida State',years:'2024–present'},
+  {year:2024,round:2,pick:60,name:'Ray Davis',pos:'RB',college:'Kentucky',years:'2024–present'},
+  {year:2024,round:3,pick:89,name:'Javon Solomon',pos:'DE',college:'Troy',years:'2024–present'},
+  {year:2024,round:4,pick:130,name:'Baylon Spector',pos:'LB',college:'Clemson',years:'2022–present'},
+  {year:2024,round:5,pick:164,name:'Zach Frazier',pos:'C',college:'West Virginia',years:'2024–present'},
+  {year:2024,round:6,pick:199,name:'Dylan McMahon',pos:'OG',college:'NC State',years:'2024–present'},
+  {year:2024,round:7,pick:241,name:'Quincy Morris',pos:'WR',college:'Western Michigan',years:'2024–present'},
+  // 2023
+  {year:2023,round:1,pick:25,name:'Dalton Kincaid',pos:'TE',college:'Utah',years:'2023–present'},
+  {year:2023,round:1,pick:27,name:'O'Cyrus Torrence',pos:'OG',college:'Florida',years:'2023–present'},
+  {year:2023,round:2,pick:59,name:'Dorian Williams',pos:'LB',college:'Tulane',years:'2023–present'},
+  {year:2023,round:3,pick:91,name:'Justin Shorter',pos:'WR',college:'Florida',years:'2023'},
+  {year:2023,round:4,pick:130,name:'Nick Broeker',pos:'OG',college:'Ole Miss',years:'2023–present'},
+  {year:2023,round:5,pick:162,name:'Alex Austin',pos:'CB',college:'Oregon State',years:'2023–present'},
+  {year:2023,round:6,pick:196,name:'Tyrel Dodson',pos:'LB',college:'Texas A&M',years:'2019–2023'},
+  {year:2023,round:7,pick:240,name:'Darrynton Evans',pos:'RB',college:'Appalachian State',years:'2023'},
+  // 2022
+  {year:2022,round:1,pick:25,name:'Kaiir Elam',pos:'CB',college:'Florida',years:'2022–2024'},
+  {year:2022,round:2,pick:57,name:'James Cook',pos:'RB',college:'Georgia',years:'2022–present'},
+  {year:2022,round:3,pick:89,name:'Khalil Shakir',pos:'WR',college:'Boise State',years:'2022–present'},
+  {year:2022,round:4,pick:121,name:'Terrel Bernard',pos:'LB',college:'Baylor',years:'2022–present'},
+  {year:2022,round:5,pick:156,name:'Christian Benford',pos:'CB',college:'Villanova',years:'2022–present'},
+  {year:2022,round:6,pick:192,name:'Baylon Spector',pos:'LB',college:'Clemson',years:'2022–present'},
+  {year:2022,round:7,pick:230,name:'Quintin Morris',pos:'TE',college:'Bowling Green',years:'2022–present'},
+  // 2021
+  {year:2021,round:1,pick:30,name:'Gregory Rousseau',pos:'DE',college:'Miami (FL)',years:'2021–present'},
+  {year:2021,round:2,pick:61,name:'Spencer Brown',pos:'OT',college:'Northern Iowa',years:'2021–present'},
+  {year:2021,round:3,pick:93,name:'Carlos Basham Jr.',pos:'DE',college:'Wake Forest',years:'2021–2023'},
+  {year:2021,round:4,pick:120,name:'Tommy Doyle',pos:'OT',college:'Miami (OH)',years:'2021–2022'},
+  {year:2021,round:5,pick:161,name:'Rachad Wildgoose',pos:'CB',college:'Wisconsin',years:'2021–2022'},
+  {year:2021,round:6,pick:193,name:'Damar Hamlin',pos:'S',college:'Pittsburgh',years:'2021–present'},
+  {year:2021,round:7,pick:238,name:'Jack Anderson',pos:'OG',college:'Texas Tech',years:'2021'},
+  // 2020
+  {year:2020,round:1,pick:30,name:'A.J. Epenesa',pos:'DE',college:'Iowa',years:'2020–present'},
+  {year:2020,round:2,pick:54,name:'Zack Moss',pos:'RB',college:'Utah',years:'2020–2021'},
+  {year:2020,round:3,pick:86,name:'Gabriel Davis',pos:'WR',college:'UCF',years:'2020–2023'},
+  {year:2020,round:4,pick:128,name:'Jake Fromm',pos:'QB',college:'Georgia',years:'2020–2021'},
+  {year:2020,round:5,pick:167,name:'Tyler Bass',pos:'K',college:'Georgia Southern',years:'2020–present'},
+  {year:2020,round:6,pick:199,name:'Reggie Gilliam',pos:'FB',college:'Toledo',years:'2020–2023'},
+  {year:2020,round:7,pick:225,name:'Isaiah Hodgins',pos:'WR',college:'Oregon State',years:'2020–2021'},
+];
+
+const draftStyles = `
+  .draft-controls { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+  .draft-search { flex:1; min-width:200px; padding:10px 14px; font-size:14px;
+    font-family:'Source Serif 4',serif; border:1px solid ${BORDER}; border-radius:4px;
+    outline:none; color:${TEXT}; }
+  .draft-search:focus { border-color:${BLUE}; box-shadow:0 0 0 2px rgba(0,51,141,0.1); }
+  .draft-year-select { padding:10px 14px; font-size:13px; font-family:'Source Serif 4',serif;
+    border:1px solid ${BORDER}; border-radius:4px; outline:none; color:${BLUE};
+    cursor:pointer; background:${BG}; }
+  .draft-year-select:focus { border-color:${BLUE}; }
+  .draft-count { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${MUTED}; margin-bottom:20px; }
+  .draft-table { width:100%; border-collapse:collapse; }
+  .draft-table th { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:${MUTED};
+    font-weight:600; padding:8px 12px; text-align:left; border-bottom:2px solid ${BLUE}; }
+  .draft-year-header td { background:#f0f4ff; font-family:'Playfair Display',serif;
+    font-size:18px; font-weight:700; color:${BLUE}; padding:12px 12px 8px;
+    border-bottom:1px solid #bfdbfe; border-top:2px solid ${BLUE}; }
+  .draft-table tr.pick-row { border-bottom:1px solid ${BORDER}; transition:background 0.12s; }
+  .draft-table tr.pick-row:hover { background:#f0f4ff; }
+  .draft-table td { padding:10px 12px; font-size:13px; color:${TEXT}; }
+  .draft-round { font-size:10px; font-weight:700; color:${MUTED}; letter-spacing:1px; }
+  .draft-pick-num { font-size:13px; font-weight:700; color:${BLUE}; }
+  .draft-player-name { font-weight:600; color:${TEXT}; }
+  .draft-pos-badge { display:inline-block; font-size:9px; letter-spacing:1.5px; text-transform:uppercase;
+    color:${RED}; font-weight:700; border:1px solid rgba(198,12,48,0.3); border-radius:2px;
+    padding:2px 6px; background:rgba(198,12,48,0.05); }
+  .draft-college { color:${MUTED}; font-size:12px; }
+  .draft-years { color:${MUTED}; font-size:12px; }
+`;
+
+function DraftHistoryPage() {
+  const [search, setSearch] = useState('');
+  const [yearFilter, setYearFilter] = useState('All');
+
+  const years = [...new Set(DRAFT_HISTORY.map(p=>p.year))].sort((a,b)=>b-a);
+
+  const filtered = DRAFT_HISTORY.filter(p=>{
+    const matchYear = yearFilter==='All' || p.year===parseInt(yearFilter);
+    const matchSearch = !search ||
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.pos.toLowerCase().includes(search.toLowerCase()) ||
+      p.college.toLowerCase().includes(search.toLowerCase());
+    return matchYear && matchSearch;
+  });
+
+  // Group by year
+  const byYear = {};
+  filtered.forEach(p=>{
+    if(!byYear[p.year]) byYear[p.year]=[];
+    byYear[p.year].push(p);
+  });
+  const sortedYears = Object.keys(byYear).map(Number).sort((a,b)=>b-a);
+
+  return (
+    <main className="container">
+      <style>{draftStyles}</style>
+      <div className="themed-hero">
+        <div className="themed-hero-label">Buffalo Bills · Draft History</div>
+        <div className="themed-hero-title">Draft History</div>
+        <div className="themed-hero-sub">Every Bills draft pick — full historical data coming soon for earlier years</div>
+      </div>
+
+      <div className="draft-controls">
+        <input className="draft-search" placeholder="Search by name, position, or college…"
+          value={search} onChange={e=>setSearch(e.target.value)} />
+        <select className="draft-year-select" value={yearFilter} onChange={e=>setYearFilter(e.target.value)}>
+          <option value="All">All Years</option>
+          {years.map(y=><option key={y} value={y}>{y}</option>)}
+        </select>
+      </div>
+
+      <div className="draft-count">{filtered.length} pick{filtered.length!==1?'s':''}</div>
+
+      <table className="draft-table">
+        <thead>
+          <tr>
+            <th>Rd</th>
+            <th>Pick</th>
+            <th>Player</th>
+            <th>Pos</th>
+            <th>College</th>
+            <th>Years w/ Bills</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sortedYears.map(year=>(
+            <>
+              <tr key={`year-${year}`} className="draft-year-header">
+                <td colSpan={6}>{year} NFL Draft</td>
+              </tr>
+              {byYear[year].map((p,i)=>(
+                <tr key={`${year}-${i}`} className="pick-row">
+                  <td><span className="draft-round">Rd {p.round}</span></td>
+                  <td><span className="draft-pick-num">#{p.pick}</span></td>
+                  <td className="draft-player-name">{p.name}</td>
+                  <td><span className="draft-pos-badge">{p.pos}</span></td>
+                  <td className="draft-college">{p.college}</td>
+                  <td className="draft-years">{p.years}</td>
+                </tr>
+              ))}
+            </>
+          ))}
+        </tbody>
+      </table>
+    </main>
+  );
+}
+
 // ── SCHEDULE PAGE ─────────────────────────────────────────────────────────────
 function SchedulePage() {
   return (
@@ -771,7 +1140,7 @@ export default function App() {
   function goSearch(q) { if(!q){setPage('home');return;} setSearchQuery(q); setPage('search'); window.scrollTo(0,0); }
   function goNav(id) { setPage(id); window.scrollTo(0,0); }
 
-  const navPage = ['home','schedule','creators','pickdate'].includes(page)?page:'home';
+  const navPage = ['home','players','draft','schedule','creators','pickdate'].includes(page)?page:'home';
 
   return (
     <>
@@ -783,6 +1152,8 @@ export default function App() {
       {page==='search'   && <SearchPage query={searchQuery} onDaySelect={goToDay} onBack={goHome}/>}
       {page==='schedule' && <SchedulePage/>}
       {page==='creators' && <ContentCreatorsPage/>}
+      {page==='players'  && <PlayersPage/>}
+      {page==='draft'    && <DraftHistoryPage/>}
       {page==='pickdate' && <PickDatePage onDaySelect={goToDay}/>}
     </>
   );
