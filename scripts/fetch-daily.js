@@ -228,7 +228,6 @@ async function fetchDailyData(dateKey) {
     'site:buffalobills.com',
     'site:buffalorumblings.com',
     'site:buffalonews.com',
-    'site:twobillsdrive.com',
     'site:si.com/nfl/bills',
     'site:espn.com buffalo bills',
     'site:nfl.com buffalo bills',
@@ -239,7 +238,7 @@ async function fetchDailyData(dateKey) {
 
   const targetedResult = await callAnthropic([{
     role: 'user',
-    content: `Search for Buffalo Bills NFL news from ${readable} on these specific sites: buffalobills.com, buffalorumblings.com, buffalonews.com, twobillsdrive.com, si.com, espn.com, nfl.com, profootballtalk.nbcsports.com.
+    content: `Search for Buffalo Bills NFL news from ${readable} on these specific sites: buffalobills.com, buffalorumblings.com, buffalonews.com, si.com, espn.com, nfl.com, profootballtalk.nbcsports.com.
 
 For each article you find, note the title, source site, and full URL.
 Write a summary of what you found on these sites.`
@@ -250,7 +249,7 @@ Write a summary of what you found on these sites.`
   const generalResult = await callAnthropic([{
     role: 'user',
     content: `Search the web broadly for any additional Buffalo Bills NFL news and articles from ${readable} that weren't already covered.
-Focus on finding articles not from these sites (already searched): buffalobills.com, buffalorumblings.com, buffalonews.com, twobillsdrive.com, si.com, espn.com, nfl.com, profootballtalk.nbcsports.com.
+Focus on finding articles not from these sites (already searched): buffalobills.com, buffalorumblings.com, buffalonews.com, si.com, espn.com, nfl.com, profootballtalk.nbcsports.com.
 For each article found, note the title, source, and URL.`
   }], true);
 
@@ -273,6 +272,7 @@ ${trimmedSearch}
 
 Convert this into a JSON object with exactly this structure:
 {
+  "headline": "very short punchy headline, 6-10 words max, summarizing the single biggest story of the day",
   "themes": ["theme 1", "theme 2", "theme 3"],
   "writeup": "3-5 sentence editorial summary",
   "articles": [
@@ -281,10 +281,11 @@ Convert this into a JSON object with exactly this structure:
 }
 
 Rules:
-- themes: 2-4 short noun phrases (4-6 words each)
+- headline: a very short, punchy, newspaper-style headline (6-10 words max) capturing the single most important story of the day. No period at the end.
+- themes: EXACTLY 3 short noun phrases (3-5 words each)
 - writeup: engaging 3-5 sentence sports journalism narrative
 - articles: every article with its real URL
-- If no Bills news: themes:["Quiet news day"], writeup:"No significant Bills news found.", articles:[{"title":"No coverage found","source":"—","url":""}]
+- If no Bills news: headline:"Quiet News Day", themes:["Quiet news day"], writeup:"No significant Bills news found.", articles:[{"title":"No coverage found","source":"—","url":""}]
 
 Respond with ONLY the JSON object. No other text.`
   }], false);

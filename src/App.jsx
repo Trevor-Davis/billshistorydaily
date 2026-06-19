@@ -71,7 +71,7 @@ const style = `
 
 
   /* Day image */
-  .day-row { display:grid; grid-template-columns:90px 110px 1fr auto; align-items:center; gap:16px; padding:14px 12px; border-bottom:1px solid ${BORDER}; cursor:pointer; transition:background 0.15s; border-radius:4px; margin:0 -12px; }
+  .day-row { display:grid; grid-template-columns:90px 110px 1fr auto; align-items:flex-start; gap:16px; padding:16px 12px; border-bottom:1px solid ${BORDER}; cursor:pointer; transition:background 0.15s; border-radius:4px; margin:0 -12px; }
   .day-thumb { width:90px; height:60px; object-fit:cover; border-radius:4px; flex-shrink:0; background:#f3f4f6; }
   .day-thumb-placeholder { width:90px; height:60px; border-radius:4px; background:linear-gradient(135deg,#00338D 0%,#001f5c 100%); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:22px; }
   .detail-image-wrap { margin-bottom:28px; border-radius:8px; overflow:hidden; position:relative; }
@@ -85,8 +85,12 @@ const style = `
   .day-weekday { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:${MUTED}; margin-bottom:4px; }
   .day-date { font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:${BLUE}; line-height:1; }
   .day-month { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:${MUTED}; margin-top:3px; }
-  .theme-chips { display:flex; flex-wrap:wrap; gap:7px; padding-top:4px; }
-  .chip { font-size:13px; padding:3px 10px; border-radius:2px; font-style:italic; font-weight:700; border:1px solid #d1d5db; color:${BLUE}; background:${BG}; white-space:nowrap; }
+  .day-headline-wrap { display:flex; flex-direction:column; gap:6px; min-width:0; padding-top:2px; }
+  .day-headline { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:${TEXT}; line-height:1.3; }
+  .day-headline.unloaded { font-family:'Source Serif 4',serif; font-weight:400; font-style:italic; color:#9ca3af; }
+  .day-writeup { font-size:13px; line-height:1.65; color:${MUTED}; font-weight:300; font-style:italic; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .theme-chips { display:flex; flex-wrap:wrap; gap:7px; }
+  .chip { font-size:11px; padding:2px 9px; border-radius:2px; font-style:italic; font-weight:600; border:1px solid #d1d5db; color:${BLUE}; background:${BG}; white-space:nowrap; }
   .chip.unloaded { border-color:#e5e7eb; color:#9ca3af; font-weight:400; font-style:normal; }
   .chip.loading { background:#eff6ff; border-color:#bfdbfe; color:#93c5fd; animation:pulse 1.4s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
@@ -476,7 +480,7 @@ function HomePage({onDaySelect}) {
         const key=dateKey(date);
         const data=cache[key];
         const isPicked=key===pickedKey;
-        const chips=data?.themes?data.themes:['Click to view'];
+        const headline = data?.headline || (data?.themes ? data.themes.slice(0,3).join(' · ') : 'Click to view');
         return (
           <div key={key} className="day-entry" style={{animationDelay:`${i*28}ms`}} ref={isPicked?pickedRowRef:null}>
             <div className={`day-row${isPicked?' highlighted':''}`} onClick={()=>onDaySelect(key)}>
@@ -491,10 +495,9 @@ function HomePage({onDaySelect}) {
                 <div className="day-date">{formatDay(date)}</div>
                 <div className="day-month">{formatMonthYear(date)}</div>
               </div>
-              <div className="theme-chips">
-                {chips.map((chip,ci)=>(
-                  <span key={ci} className={`chip${!data?' unloaded':''}`}>{chip}</span>
-                ))}
+              <div className="day-headline-wrap">
+                <div className={`day-headline${!data?' unloaded':''}`}>{headline}</div>
+                {data?.writeup && <div className="day-writeup">{data.writeup}</div>}
               </div>
               <div style={{color:BLUE,paddingTop:6,fontSize:18}}>›</div>
             </div>
@@ -644,7 +647,7 @@ const CREATORS = [
   {
     name: 'Cover 1',
     handle: '@Cover1Sports',
-    photo: 'https://cover1.net/wp-content/uploads/2020/10/Cover1-Logo-Social.jpg',
+    photo: '/images/creators/cover1.jpg',
     type: 'Podcast · YouTube · Website',
     bio: 'A Buffalo Bills podcast hosted by Aaron Quinn and Greg Tompsett, with additional coverage from Anthony Prohaska and the broader Cover 1 team. Known for film breakdowns, game previews and postgame analysis, draft coverage, and making the complexities of football more accessible to Bills fans.',
     links: [
@@ -655,11 +658,23 @@ const CREATORS = [
     ]
   },
   {
+    name: 'Eric Wood',
+    handle: '@thebuffalopod',
+    photo: '/images/creators/ericwood.webp',
+    type: 'Podcast · YouTube · Radio',
+    bio: 'Former Bills Pro Bowl center (2009–2018) and current Bills Radio Network color commentator alongside John Murphy. Hosts the "Centered on Buffalo" podcast, bringing a pro player\'s perspective to postgame recaps, exclusive interviews with current and former Bills, and behind-the-scenes stories from the field.',
+    links: [
+      { label: 'Podcast', url: 'https://podcasts.apple.com/us/podcast/centered-on-buffalo-podcast-w-eric-wood-for-buffalo/id1663337716' },
+      { label: 'YouTube', url: 'https://www.youtube.com/@thebuffalopod' },
+      { label: 'iHeart', url: 'https://www.iheart.com/podcast/269-centered-on-buffalo-podcas-106907889/' },
+    ]
+  },
+  {
     name: 'Joe Marino',
     handle: '@TheJoeMarino',
-    photo: 'https://lockedonpodcasts.com/wp-content/uploads/2022/08/Joe-Marino-Headshot.jpg',
+    photo: '/images/creators/joemarino.jpeg',
     type: 'Podcast · YouTube · Substack',
-    bio: 'Host of the Locked On Bills daily podcast, Locked On NFL Scouting, and First Read. Delivers expert local analysis, film breakdowns, and insider Bills coverage 365 days a year. Author of Go Bills! and Buffalo's Run.',
+    bio: "Host of the Locked On Bills daily podcast, Locked On NFL Scouting, and First Read. Delivers expert local analysis, film breakdowns, and insider Bills coverage 365 days a year. Author of Go Bills! and Buffalo's Run.",
     links: [
       { label: 'Podcast', url: 'https://lockedonpodcasts.com/podcasts/locked-on-bills/' },
       { label: 'YouTube', url: 'https://www.youtube.com/channel/UCB53sJjGaYU8RmLV9F9wPvQ' },
@@ -789,7 +804,7 @@ const PLAYERS_BY_DECADE = {
     {name:'Dion Dawkins',pos:'OT',years:'2017–present'},
     {name:'Spencer Brown',pos:'OT',years:'2021–present'},
     {name:'David Edwards',pos:'OG',years:'2024–present'},
-    {name:'O'Cyrus Torrence',pos:'OG',years:'2023–present'},
+    {name:"O'Cyrus Torrence",pos:'OG',years:'2023–present'},
     {name:'Connor McGovern',pos:'C',years:'2022–present'},
     // Defense
     {name:'Greg Rousseau',pos:'DE',years:'2021–present'},
@@ -801,7 +816,7 @@ const PLAYERS_BY_DECADE = {
     {name:'Dorian Williams',pos:'LB',years:'2023–present'},
     {name:'Baylon Spector',pos:'LB',years:'2022–present'},
     {name:'Christian Benford',pos:'CB',years:'2022–present'},
-    {name:'Tre'Davious White',pos:'CB',years:'2017–present'},
+    {name:"Tre'Davious White",pos:'CB',years:'2017–present'},
     {name:'Maxwell Hairston',pos:'CB',years:'2024–present'},
     {name:'Davison Igbinosun',pos:'CB',years:'2026–present'},
     {name:'Damar Hamlin',pos:'S',years:'2021–present'},
@@ -932,7 +947,7 @@ const DRAFT_HISTORY = [
   {year:2026,round:6,pick:189,name:'Jude Bowry',pos:'OT',college:'Boston College',years:'2026–present'},
   {year:2026,round:7,pick:220,name:'Toriano Pride Jr.',pos:'CB',college:'Missouri',years:'2026–present'},
   {year:2026,round:7,pick:237,name:'Tommy Doman',pos:'P',college:'Temple',years:'2026–present'},
-  {year:2026,round:7,pick:243,name:'Ar'maj Reed-Adams',pos:'OG',college:'Tennessee',years:'2026–present'},
+  {year:2026,round:7,pick:243,name:"Ar'maj Reed-Adams",pos:'OG',college:'Tennessee',years:'2026–present'},
   // 2025
   {year:2025,round:1,pick:30,name:'Maxwell Hairston',pos:'CB',college:'Kentucky',years:'2025–present'},
   {year:2025,round:2,pick:48,name:'Deone Walker',pos:'DT',college:'Michigan',years:'2025–present'},
@@ -951,7 +966,7 @@ const DRAFT_HISTORY = [
   {year:2024,round:7,pick:241,name:'Quincy Morris',pos:'WR',college:'Western Michigan',years:'2024–present'},
   // 2023
   {year:2023,round:1,pick:25,name:'Dalton Kincaid',pos:'TE',college:'Utah',years:'2023–present'},
-  {year:2023,round:1,pick:27,name:'O'Cyrus Torrence',pos:'OG',college:'Florida',years:'2023–present'},
+  {year:2023,round:1,pick:27,name:"O'Cyrus Torrence",pos:'OG',college:'Florida',years:'2023–present'},
   {year:2023,round:2,pick:59,name:'Dorian Williams',pos:'LB',college:'Tulane',years:'2023–present'},
   {year:2023,round:3,pick:91,name:'Justin Shorter',pos:'WR',college:'Florida',years:'2023'},
   {year:2023,round:4,pick:130,name:'Nick Broeker',pos:'OG',college:'Ole Miss',years:'2023–present'},
