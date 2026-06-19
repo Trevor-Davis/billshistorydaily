@@ -171,12 +171,17 @@ const style = `
   .sched-table { width:100%; border-collapse:collapse; }
   .sched-table th { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:${MUTED}; font-weight:600; padding:8px 12px; text-align:left; border-bottom:2px solid ${BLUE}; }
   .sched-row { border-bottom:1px solid ${BORDER}; transition:background 0.12s; }
-  .sched-row:hover { background:#f0f4ff; }
+  .sched-row { transition:background 0.15s, box-shadow 0.15s; }
+  .sched-row:hover { background:color-mix(in srgb, var(--team-color, #00338D) 10%, white); box-shadow:inset 4px 0 0 var(--team-color, #00338D); }
   .sched-row.primetime { background:#fffbf0; }
-  .sched-row.primetime:hover { background:#fff3cc; }
+  .sched-row.primetime:hover { background:color-mix(in srgb, var(--team-color, #00338D) 14%, #fffbf0); box-shadow:inset 4px 0 0 var(--team-color, #00338D); }
+  .sched-row.bye { opacity:0.6; font-style:italic; }
+  .sched-row.bye:hover { background:transparent; box-shadow:none; }
   .sched-week { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; color:${BLUE}; padding:14px 12px; width:52px; }
   .sched-date { font-size:12px; color:${TEXT}; padding:14px 12px; white-space:nowrap; width:120px; }
   .sched-opponent { font-size:14px; font-weight:600; color:${TEXT}; padding:14px 12px; }
+  .sched-opponent-inner { display:flex; align-items:center; gap:10px; }
+  .sched-logo { width:28px; height:28px; object-fit:contain; flex-shrink:0; }
   .sched-away { color:${MUTED}; font-size:11px; font-weight:400; margin-right:4px; }
   .sched-note { display:inline-block; font-size:9px; letter-spacing:1px; text-transform:uppercase; background:${RED}; color:#fff; border-radius:2px; padding:2px 6px; margin-left:8px; vertical-align:middle; }
   .sched-note.blue { background:${BLUE}; }
@@ -316,26 +321,39 @@ Include 8-14 creators. Only real, active creators. Respond ONLY with raw JSON.`
   return JSON.parse(jsonMatch[0]);
 }
 
+// ── TEAM COLORS (for schedule hover effect) ───────────────────────────────────
+const TEAM_COLORS = {
+  hou: "#03202F", det: "#0076B6", lac: "#0080C6", ne: "#002244",
+  lar: "#003594", lv: "#000000", bal: "#241773", min: "#4F2683",
+  nyj: "#125740", mia: "#008E97", kc: "#E31837", gb: "#203731",
+  chi: "#0B162A", den: "#FB4F14",
+};
+
+function teamLogoUrl(team) {
+  if (!team) return null;
+  return `https://a.espncdn.com/i/teamlogos/nfl/500/${team}.png`;
+}
+
 // ── SCHEDULE DATA ─────────────────────────────────────────────────────────────
 const SCHEDULE_2026 = [
-  {week:1, date:"Sep 13, 2026",day:"Sun",opponent:"at New York Jets",time:"1:00 PM ET",tv:"CBS",home:false},
-  {week:2, date:"Sep 20, 2026",day:"Sun",opponent:"Miami Dolphins",time:"1:00 PM ET",tv:"CBS",home:true},
-  {week:3, date:"Sep 27, 2026",day:"Sun",opponent:"at New England Patriots",time:"1:00 PM ET",tv:"CBS",home:false},
-  {week:4, date:"Oct 4, 2026",day:"Sun",opponent:"Houston Texans",time:"4:25 PM ET",tv:"CBS",home:true},
-  {week:5, date:"Oct 11, 2026",day:"Sun",opponent:"at Baltimore Ravens",time:"4:25 PM ET",tv:"CBS",home:false},
-  {week:6, date:"Oct 18, 2026",day:"Sun",opponent:"New York Jets",time:"1:00 PM ET",tv:"CBS",home:true},
-  {week:7, date:"Oct 25, 2026",day:"Sun",opponent:"at Los Angeles Rams",time:"4:05 PM ET",tv:"FOX",home:false},
-  {week:8, date:"Nov 1, 2026",day:"Sun",opponent:"New England Patriots",time:"1:00 PM ET",tv:"CBS",home:true},
-  {week:9, date:"Nov 8, 2026",day:"Sun",opponent:"at Miami Dolphins",time:"1:00 PM ET",tv:"CBS",home:false},
-  {week:10,date:"Nov 15, 2026",day:"Sun",opponent:"San Francisco 49ers",time:"4:25 PM ET",tv:"FOX",home:true},
-  {week:11,date:"Nov 22, 2026",day:"Sun",opponent:"at Kansas City Chiefs",time:"4:25 PM ET",tv:"CBS",home:false},
-  {week:12,date:"Nov 26, 2026",day:"Thu",opponent:"Kansas City Chiefs",time:"4:30 PM ET",tv:"NBC",home:true,primetime:true,note:"Thanksgiving"},
-  {week:13,date:"Dec 6, 2026",day:"Sun",opponent:"at Indianapolis Colts",time:"1:00 PM ET",tv:"CBS",home:false},
-  {week:14,date:"Dec 13, 2026",day:"Sun",opponent:"Seattle Seahawks",time:"1:00 PM ET",tv:"FOX",home:true},
-  {week:15,date:"Dec 20, 2026",day:"Sun",opponent:"at Pittsburgh Steelers",time:"8:20 PM ET",tv:"NBC",home:false,primetime:true},
-  {week:16,date:"Dec 25, 2026",day:"Fri",opponent:"at Denver Broncos",time:"4:30 PM ET",tv:"Netflix",home:false,primetime:true,note:"Christmas Day"},
-  {week:17,date:"Jan 3, 2027",day:"Sun",opponent:"New York Giants",time:"1:00 PM ET",tv:"CBS",home:true},
-  {week:18,date:"Jan 10, 2027",day:"Sun",opponent:"TBD",time:"TBD",tv:"TBD",home:null},
+  {week:1, date:"Sep 13, 2026",day:"Sun",opponent:"at Houston Texans",team:"hou",time:"1:00 PM ET",tv:"CBS",home:false},
+  {week:2, date:"Sep 17, 2026",day:"Thu",opponent:"Detroit Lions",team:"det",time:"8:15 PM ET",tv:"Prime Video",home:true,primetime:true},
+  {week:3, date:"Sep 27, 2026",day:"Sun",opponent:"Los Angeles Chargers",team:"lac",time:"1:00 PM ET",tv:"FOX",home:true},
+  {week:4, date:"Oct 4, 2026", day:"Sun",opponent:"New England Patriots",team:"ne",time:"1:00 PM ET",tv:"CBS",home:true},
+  {week:5, date:"Oct 12, 2026",day:"Mon",opponent:"at Los Angeles Rams",team:"lar",time:"8:15 PM ET",tv:"ESPN",home:false,primetime:true},
+  {week:6, date:"Oct 18, 2026",day:"Sun",opponent:"at Las Vegas Raiders",team:"lv",time:"4:25 PM ET",tv:"CBS",home:false},
+  {week:7, date:"—",day:"BYE",opponent:"Bye Week",team:null,time:"",tv:"",home:null,bye:true},
+  {week:8, date:"Nov 1, 2026", day:"Sun",opponent:"Baltimore Ravens",team:"bal",time:"1:00 PM ET",tv:"CBS",home:true},
+  {week:9, date:"Nov 9, 2026", day:"Mon",opponent:"at Minnesota Vikings",team:"min",time:"8:15 PM ET",tv:"ESPN",home:false,primetime:true},
+  {week:10,date:"Nov 15, 2026",day:"Sun",opponent:"at New York Jets",team:"nyj",time:"1:00 PM ET",tv:"CBS",home:false},
+  {week:11,date:"Nov 22, 2026",day:"Sun",opponent:"Miami Dolphins",team:"mia",time:"1:00 PM ET",tv:"FOX",home:true},
+  {week:12,date:"Nov 26, 2026",day:"Thu",opponent:"Kansas City Chiefs",team:"kc",time:"8:20 PM ET",tv:"NBC",home:true,primetime:true,note:"Thanksgiving"},
+  {week:13,date:"Dec 6, 2026", day:"Sun",opponent:"at New England Patriots",team:"ne",time:"4:25 PM ET",tv:"CBS",home:false},
+  {week:14,date:"Dec 13, 2026",day:"Sun",opponent:"at Green Bay Packers",team:"gb",time:"8:20 PM ET",tv:"NBC",home:false,primetime:true},
+  {week:15,date:"Dec 19, 2026",day:"Sat",opponent:"Chicago Bears",team:"chi",time:"8:20 PM ET",tv:"CBS",home:true,primetime:true},
+  {week:16,date:"Dec 25, 2026",day:"Fri",opponent:"at Denver Broncos",team:"den",time:"4:30 PM ET",tv:"Netflix",home:false,primetime:true,note:"Christmas Day"},
+  {week:17,date:"Jan 3, 2027", day:"Sun",opponent:"at Miami Dolphins",team:"mia",time:"1:00 PM ET",tv:"CBS",home:false},
+  {week:18,date:"TBD",day:"TBD",opponent:"New York Jets",team:"nyj",time:"TBD",tv:"TBD",home:true,note:"Flex"},
 ];
 
 // ── NAV ───────────────────────────────────────────────────────────────────────
@@ -1123,20 +1141,38 @@ function SchedulePage() {
           </tr>
         </thead>
         <tbody>
-          {SCHEDULE_2026.map((g,i)=>(
-            <tr key={i} className={`sched-row${g.primetime?' primetime':''}`}>
+          {SCHEDULE_2026.map((g,i)=>{
+            const teamColor = g.team ? TEAM_COLORS[g.team] : null;
+            return (
+            <tr
+              key={i}
+              className={`sched-row${g.primetime?' primetime':''}${g.bye?' bye':''}`}
+              style={teamColor ? {'--team-color': teamColor} : undefined}
+            >
               <td className="sched-week">{g.week}</td>
-              <td className="sched-date">{g.day}, {g.date}</td>
+              <td className="sched-date">{g.bye ? '—' : `${g.day}, ${g.date}`}</td>
               <td className="sched-opponent">
-                {!g.home&&g.home!==null&&<span className="sched-away">@</span>}
-                {g.opponent}
-                {g.note&&<span className="sched-note">{g.note}</span>}
-                {g.primetime&&!g.note&&<span className="sched-note blue">Primetime</span>}
+                <span className="sched-opponent-inner">
+                  {teamLogoUrl(g.team) && (
+                    <img
+                      className="sched-logo"
+                      src={teamLogoUrl(g.team)}
+                      alt={g.opponent}
+                      onError={e=>{e.target.style.display='none';}}
+                    />
+                  )}
+                  <span>
+                    {!g.home&&g.home!==null&&!g.bye&&<span className="sched-away">@</span>}
+                    {g.opponent}
+                    {g.note&&<span className="sched-note">{g.note}</span>}
+                    {g.primetime&&!g.note&&<span className="sched-note blue">Primetime</span>}
+                  </span>
+                </span>
               </td>
               <td className="sched-time">{g.time}</td>
               <td className="sched-tv">{g.tv}</td>
             </tr>
-          ))}
+          );})}
         </tbody>
       </table>
     </main>
