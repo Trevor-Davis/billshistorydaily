@@ -62,6 +62,7 @@ const RSS_FEEDS = [
   { name: 'WKBW Bills',        url: 'https://www.wkbw.com/sports/buffalo-bills/rss', loose: true },
   { name: 'ESPN',              url: 'https://www.espn.com/espn/rss/nfl/news', loose: true, filter: ['bills', 'buffalo'] },
   { name: 'Pro Football Talk', url: 'https://profootballtalk.nbcsports.com/feed/', loose: true, filter: ['bills', 'buffalo'] },
+  { name: 'Bills News Aggregator', url: 'https://rss.app/feeds/v1.1/_kUr4Rzeb0eCbl80W.json', loose: true, jsonfeed: true },
 ];
 
 function extractText(xml, tag) {
@@ -110,6 +111,34 @@ async function fetchRssArticles(dateKey) {
         signal: AbortSignal.timeout(10000)
       });
       if (!res.ok) { console.log(`  ${feed.name}: HTTP ${res.status}`); continue; }
+
+      // Handle JSON Feed spec (jsonfeed.org) e.g. rss.app exports
+      if (feed.jsonfeed) {
+        const data = await res.json();
+        const posts = data.items || [];
+        console.log(`  ${feed.name}: ${posts.length} items`);
+        for (const post of posts) {
+          const pubDate = new Date(post.date_published);
+          if (isNaN(pubDate.getTime())) continue;
+          const slack = feed.loose ? 2 * 24 * 60 * 60 * 1000 : 0;
+          if (pubDate < new Date(targetDate.getTime() - slack) ||
+              pubDate > new Date(nextDate.getTime() + slack)) continue;
+
+          const title = (post.title || '').trim();
+          const url   = post.url;
+          if (!title || !url) continue;
+
+          if (feed.filter) {
+            const keywords = Array.isArray(feed.filter) ? feed.filter : [feed.filter];
+            const text = (title + ' ' + (post.content_text || '')).toLowerCase();
+            if (!keywords.some(k => text.includes(k))) continue;
+          }
+
+          articles.push({ title, source: feed.name, url, image: post.image || null });
+          console.log(`  ✓ ${title.substring(0, 70)}`);
+        }
+        continue;
+      }
 
       // Handle JSON feeds (e.g. WordPress REST API)
       if (feed.json) {
@@ -330,16 +359,23 @@ Respond with ONLY the JSON object. No other text.`
     }
   }
 
-  // Step 4: Try to extract og:image from each article
+  // Step 4: Find an image — prefer one already supplied by RSS, else scrape og:image
   console.log('Step 3: Looking for article image...');
   let imageUrl = '';
-  for (const article of parsed.articles) {
-    if (!article.url || article.url === '') continue;
-    console.log(`  Trying: ${article.source}`);
-    const img = await extractOgImage(article.url);
-    if (img) {
-      imageUrl = img;
-      break;
+
+  const preSuppliedImage = parsed.articles.find(a => a.image)?.image;
+  if (preSuppliedImage) {
+    imageUrl = preSuppliedImage;
+    console.log('✓ Using image supplied by RSS feed');
+  } else {
+    for (const article of parsed.articles) {
+      if (!article.url || article.url === '') continue;
+      console.log(`  Trying: ${article.source}`);
+      const img = await extractOgImage(article.url);
+      if (img) {
+        imageUrl = img;
+        break;
+      }
     }
   }
 
@@ -350,6 +386,9 @@ Respond with ONLY the JSON object. No other text.`
     parsed.imageUrl = '';
     console.log('No image found — app will use fallback.');
   }
+
+  // Clean up: remove temporary per-article image field, keep articles shape consistent
+  parsed.articles = parsed.articles.map(({ title, source, url }) => ({ title, source, url }));
 
   return parsed;
 }

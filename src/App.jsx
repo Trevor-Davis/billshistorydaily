@@ -324,14 +324,14 @@ Include 8-14 creators. Only real, active creators. Respond ONLY with raw JSON.`
 // ── TEAM COLORS (for schedule hover effect) ───────────────────────────────────
 const TEAM_COLORS = {
   hou: "#03202F", det: "#0076B6", lac: "#0080C6", ne: "#002244",
-  lar: "#003594", lv: "#000000", bal: "#241773", min: "#4F2683",
+  lar: "#003594", lv: "#000000", ravens: "#241773", min: "#4F2683",
   nyj: "#125740", mia: "#008E97", kc: "#E31837", gb: "#203731",
   chi: "#0B162A", den: "#FB4F14",
 };
 
 function teamLogoUrl(team) {
-  if (!team) return null;
-  return `https://a.espncdn.com/i/teamlogos/nfl/500/${team}.png`;
+  if (!team) return `/images/logos/NFL.png`;
+  return `/images/logos/${team}.png`;
 }
 
 // ── SCHEDULE DATA ─────────────────────────────────────────────────────────────
@@ -343,7 +343,7 @@ const SCHEDULE_2026 = [
   {week:5, date:"Oct 12, 2026",day:"Mon",opponent:"at Los Angeles Rams",team:"lar",time:"8:15 PM ET",tv:"ESPN",home:false,primetime:true},
   {week:6, date:"Oct 18, 2026",day:"Sun",opponent:"at Las Vegas Raiders",team:"lv",time:"4:25 PM ET",tv:"CBS",home:false},
   {week:7, date:"—",day:"BYE",opponent:"Bye Week",team:null,time:"",tv:"",home:null,bye:true},
-  {week:8, date:"Nov 1, 2026", day:"Sun",opponent:"Baltimore Ravens",team:"bal",time:"1:00 PM ET",tv:"CBS",home:true},
+  {week:8, date:"Nov 1, 2026", day:"Sun",opponent:"Baltimore Ravens",team:"ravens",time:"1:00 PM ET",tv:"CBS",home:true},
   {week:9, date:"Nov 9, 2026", day:"Mon",opponent:"at Minnesota Vikings",team:"min",time:"8:15 PM ET",tv:"ESPN",home:false,primetime:true},
   {week:10,date:"Nov 15, 2026",day:"Sun",opponent:"at New York Jets",team:"nyj",time:"1:00 PM ET",tv:"CBS",home:false},
   {week:11,date:"Nov 22, 2026",day:"Sun",opponent:"Miami Dolphins",team:"mia",time:"1:00 PM ET",tv:"FOX",home:true},
@@ -1153,12 +1153,18 @@ function SchedulePage() {
               <td className="sched-date">{g.bye ? '—' : `${g.day}, ${g.date}`}</td>
               <td className="sched-opponent">
                 <span className="sched-opponent-inner">
-                  {teamLogoUrl(g.team) && (
+                  {!g.bye && (
                     <img
                       className="sched-logo"
                       src={teamLogoUrl(g.team)}
                       alt={g.opponent}
-                      onError={e=>{e.target.style.display='none';}}
+                      onError={e=>{
+                        if (!e.target.src.endsWith('/images/logos/NFL.png')) {
+                          e.target.src = '/images/logos/NFL.png';
+                        } else {
+                          e.target.style.display = 'none';
+                        }
+                      }}
                     />
                   )}
                   <span>
