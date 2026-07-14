@@ -62,7 +62,7 @@ const RSS_FEEDS = [
   { name: 'WKBW Bills',        url: 'https://www.wkbw.com/sports/buffalo-bills/rss', loose: true },
   { name: 'ESPN',              url: 'https://www.espn.com/espn/rss/nfl/news', loose: true, filter: ['bills', 'buffalo'] },
   { name: 'Pro Football Talk', url: 'https://profootballtalk.nbcsports.com/feed/', loose: true, filter: ['bills', 'buffalo'] },
-  { name: 'Bills News Aggregator', url: 'https://rss.app/feeds/v1.1/_kUr4Rzeb0eCbl80W.json', loose: true, jsonfeed: true },
+  { name: 'Bills News Aggregator', url: 'https://rss.app/feeds/v1.1/_kUr4Rzeb0eCbl80W.json', loose: true, jsonfeed: true, useAuthor: true },
   { name: 'Bills YouTube',     url: 'https://rss.app/feeds/v1.1/_V749Ggacq7cF1gct.json', loose: true, jsonfeed: true, filter: ['bills', 'buffalo', 'josh allen', 'mcdermott', 'joe brady'] },
 ];
 
@@ -118,6 +118,48 @@ async function fetchRssArticles(dateKey) {
         const data = await res.json();
         const posts = data.items || [];
         console.log(`  ${feed.name}: ${posts.length} items`);
+
+        // Domain-to-publication name map for known sources
+        const SOURCE_NAMES = {
+          'buffalorumblings.com':      'Buffalo Rumblings',
+          'buffalobills.com':          'Buffalo Bills',
+          'bangedupbills.com':         'Banged Up Bills',
+          'twobillsdrive.com':         'Two Bills Drive',
+          'buffalonews.com':           'Buffalo News',
+          'wgr550.com':                'WGR 550',
+          'wkbw.com':                  'WKBW',
+          'espn.com':                  'ESPN',
+          'nbcsports.com':             'Pro Football Talk',
+          'profootballtalk.com':       'Pro Football Talk',
+          'si.com':                    'Sports Illustrated',
+          'heavy.com':                 'Heavy.com',
+          'nfl.com':                   'NFL.com',
+          'usatoday.com':              'USA Today',
+          'billswire.usatoday.com':    'Bills Wire',
+          'nypost.com':                'NY Post',
+          'cbssports.com':             'CBS Sports',
+          'foxsports.com':             'Fox Sports',
+          'theathletic.com':           'The Athletic',
+          'bleacherreport.com':        'Bleacher Report',
+          'sportingnews.com':          'Sporting News',
+          'yardbarker.com':            'Yardbarker',
+          'youtube.com':               'YouTube',
+          'youtu.be':                  'YouTube',
+        };
+
+        function sourceFromUrl(url) {
+          try {
+            const hostname = new URL(url).hostname.replace('www.', '');
+            for (const [domain, name] of Object.entries(SOURCE_NAMES)) {
+              if (hostname.includes(domain)) return name;
+            }
+            // Fallback: capitalize the domain
+            return hostname.split('.')[0].replace(/^\w/, c => c.toUpperCase());
+          } catch(e) {
+            return feed.name;
+          }
+        }
+
         for (const post of posts) {
           const pubDate = new Date(post.date_published);
           if (isNaN(pubDate.getTime())) continue;
@@ -135,8 +177,11 @@ async function fetchRssArticles(dateKey) {
             if (!keywords.some(k => text.includes(k))) continue;
           }
 
-          articles.push({ title, source: feed.name, url, image: post.image || null });
-          console.log(`  ✓ ${title.substring(0, 70)}`);
+          const source = (feed.useAuthor && (post.author?.name || post.author))
+            ? (post.author?.name || post.author)
+            : sourceFromUrl(url);
+          articles.push({ title, source, url, image: post.image || null });
+          console.log(`  ✓ [${source}] ${title.substring(0, 60)}`);
         }
         continue;
       }
