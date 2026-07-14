@@ -63,6 +63,7 @@ const RSS_FEEDS = [
   { name: 'ESPN',              url: 'https://www.espn.com/espn/rss/nfl/news', loose: true, filter: ['bills', 'buffalo'] },
   { name: 'Pro Football Talk', url: 'https://profootballtalk.nbcsports.com/feed/', loose: true, filter: ['bills', 'buffalo'] },
   { name: 'Bills News Aggregator', url: 'https://rss.app/feeds/v1.1/_kUr4Rzeb0eCbl80W.json', loose: true, jsonfeed: true },
+  { name: 'Bills YouTube',     url: 'https://rss.app/feeds/v1.1/_V749Ggacq7cF1gct.json', loose: true, jsonfeed: true, filter: ['bills', 'buffalo', 'josh allen', 'mcdermott', 'joe brady'] },
 ];
 
 function extractText(xml, tag) {
@@ -243,6 +244,22 @@ async function extractOgImage(url) {
 async function fetchDailyData(dateKey) {
   const readable = readableDate(dateKey);
 
+  // Load yesterday's headline to avoid repeating the same topic
+  let yesterdayHeadline = '';
+  try {
+    const d = new Date(dateKey + 'T12:00:00');
+    d.setDate(d.getDate() - 1);
+    const yKey = d.toISOString().split('T')[0];
+    const yPath = path.join(__dirname, '..', 'public', 'data', `${yKey}.json`);
+    if (fs.existsSync(yPath)) {
+      const yData = JSON.parse(fs.readFileSync(yPath, 'utf8'));
+      yesterdayHeadline = yData.headline || '';
+      if (yesterdayHeadline) console.log(`Yesterday's headline: "${yesterdayHeadline}"`);
+    }
+  } catch(e) {
+    // No yesterday data — that's fine
+  }
+
   // Step 1: Fetch RSS feeds first (fastest and most reliable)
   console.log('Step 1: Fetching RSS feeds...');
   const rssArticles = await fetchRssArticles(dateKey);
@@ -310,7 +327,7 @@ Convert this into a JSON object with exactly this structure:
 }
 
 Rules:
-- headline: a very short, punchy, newspaper-style headline (6-10 words max) capturing the single most important story of the day. No period at the end.
+- headline: a very short, punchy, newspaper-style headline (6-10 words max) capturing the single most important story of the day. No period at the end.${yesterdayHeadline ? `\n- IMPORTANT: Yesterday's headline was "${yesterdayHeadline}" — today's headline must cover a DIFFERENT topic or story angle. Do not repeat the same subject.` : ''}
 - themes: EXACTLY 3 short noun phrases (3-5 words each)
 - writeup: engaging 3-5 sentence sports journalism narrative
 - articles: every article with its real URL
@@ -358,6 +375,32 @@ Respond with ONLY the JSON object. No other text.`
       existingUrls.add(a.url);
     }
   }
+
+  // Deduplicate articles with very similar titles
+  function normalizeTitle(t) {
+    return t.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, '')  // strip punctuation
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+  function titleSimilarity(a, b) {
+    const wa = new Set(normalizeTitle(a).split(' ').filter(w => w.length > 3));
+    const wb = new Set(normalizeTitle(b).split(' ').filter(w => w.length > 3));
+    const intersection = [...wa].filter(w => wb.has(w)).length;
+    const union = new Set([...wa, ...wb]).size;
+    return union === 0 ? 0 : intersection / union;
+  }
+
+  const deduped = [];
+  for (const article of parsed.articles) {
+    const isDuplicate = deduped.some(kept =>
+      titleSimilarity(article.title, kept.title) > 0.6
+    );
+    if (!isDuplicate) deduped.push(article);
+    else console.log(`  Deduped: "${article.title.substring(0, 60)}"`);
+  }
+  parsed.articles = deduped;
+  console.log(`Articles after dedup: ${parsed.articles.length}`);
 
   // Step 4: Find an image — prefer one already supplied by RSS, else scrape og:image
   console.log('Step 3: Looking for article image...');
