@@ -870,13 +870,21 @@ const playerPageStyles = `
     transition:background 0.15s,color 0.15s,border-color 0.15s; }
   .decade-tab:hover { background:${BG_ALT}; border-color:${BLUE}; }
   .decade-tab.active { background:${BLUE}; color:#fff; border-color:${BLUE}; }
-  .players-search { width:100%; padding:10px 14px; font-size:14px; font-family:'Source Serif 4',serif;
-    border:1px solid ${BORDER}; border-radius:4px; outline:none; margin-bottom:8px; color:${TEXT}; }
+  .players-filters { display:flex; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+  .players-search { flex:2; min-width:160px; padding:10px 14px; font-size:14px; font-family:'Source Serif 4',serif;
+    border:1px solid ${BORDER}; border-radius:4px; outline:none; color:${TEXT}; }
   .players-search:focus { border-color:${BLUE}; box-shadow:0 0 0 2px rgba(0,51,141,0.1); }
+  .players-select { flex:1; min-width:120px; padding:10px 14px; font-size:13px; font-family:'Source Serif 4',serif;
+    border:1px solid ${BORDER}; border-radius:4px; outline:none; color:${BLUE}; background:${BG}; cursor:pointer; }
+  .players-select:focus { border-color:${BLUE}; }
+  .players-year-input { flex:1; min-width:100px; padding:10px 14px; font-size:13px; font-family:'Source Serif 4',serif;
+    border:1px solid ${BORDER}; border-radius:4px; outline:none; color:${TEXT}; }
+  .players-year-input:focus { border-color:${BLUE}; }
   .players-count { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${MUTED}; margin-bottom:20px; }
   .players-table { width:100%; border-collapse:collapse; }
   .players-table th { font-size:9px; letter-spacing:2.5px; text-transform:uppercase; color:${MUTED};
-    font-weight:600; padding:8px 12px; text-align:left; border-bottom:2px solid ${BLUE}; }
+    font-weight:600; padding:8px 12px; text-align:left; border-bottom:2px solid ${BLUE}; cursor:pointer; user-select:none; }
+  .players-table th:hover { color:${BLUE}; }
   .players-table tr { border-bottom:1px solid ${BORDER}; transition:background 0.12s; }
   .players-table tr:hover { background:#f0f4ff; }
   .players-table td { padding:11px 12px; font-size:14px; color:${TEXT}; }
@@ -885,20 +893,81 @@ const playerPageStyles = `
     color:${RED}; font-weight:700; border:1px solid rgba(198,12,48,0.3); border-radius:2px;
     padding:2px 6px; background:rgba(198,12,48,0.05); }
   .players-coming-soon { font-size:14px; color:${MUTED}; font-style:italic; padding:32px 0; text-align:center; }
+  .sort-arrow { margin-left:4px; opacity:0.5; }
+  .sort-arrow.active { opacity:1; color:${BLUE}; }
+  .filter-clear { font-size:11px; letter-spacing:1px; text-transform:uppercase; color:${RED};
+    cursor:pointer; background:none; border:none; padding:0; font-family:'Source Serif 4',serif;
+    align-self:center; white-space:nowrap; }
+  .filter-clear:hover { text-decoration:underline; }
 `;
+
+function parseYearRange(years) {
+  if (!years) return { start: 0, end: 9999 };
+  const clean = years.replace('–present', `–${new Date().getFullYear()}`).replace('—', '–');
+  const parts = clean.split(/[–\-,]/);
+  const nums = parts.map(p => parseInt(p.trim())).filter(n => !isNaN(n));
+  return { start: Math.min(...nums), end: Math.max(...nums) };
+}
 
 function PlayersPage() {
   const [decade, setDecade] = useState('2020s');
   const [search, setSearch] = useState('');
+  const [posFilter, setPosFilter] = useState('All');
+  const [yearFilter, setYearFilter] = useState('');
+  const [sortCol, setSortCol] = useState('name');
+  const [sortDir, setSortDir] = useState('asc');
 
   const allPlayers = PLAYERS_BY_DECADE[decade] || [];
-  const filtered = search
-    ? allPlayers.filter(p =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.pos.toLowerCase().includes(search.toLowerCase()))
-    : allPlayers;
 
-  const sorted = [...filtered].sort((a,b) => a.name.localeCompare(b.name));
+  // Get unique positions for the dropdown
+  const positions = ['All', ...new Set(allPlayers.map(p => p.pos))].sort();
+
+  function handleSort(col) {
+    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortCol(col); setSortDir('asc'); }
+  }
+
+  function clearFilters() {
+    setSearch(''); setPosFilter('All'); setYearFilter('');
+  }
+
+  const filtered = allPlayers.filter(p => {
+    const matchName = !search || p.name.toLowerCase().includes(search.toLowerCase());
+    const matchPos  = posFilter === 'All' || p.pos === posFilter;
+    const matchYear = (() => {
+      const y = parseInt(yearFilter);
+      if (!yearFilter || isNaN(y)) return true;
+      const { start, end } = parseYearRange(p.years);
+      return y >= start && y <= end;
+    })();
+    return matchName && matchPos && matchYear;
+  });
+
+  const sorted = [...filtered].sort((a, b) => {
+    let va = a[sortCol] || '', vb = b[sortCol] || '';
+    if (sortCol === 'years') {
+      va = parseYearRange(a.years).start;
+      vb = parseYearRange(b.years).start;
+      return sortDir === 'asc' ? va - vb : vb - va;
+    }
+    return sortDir === 'asc'
+      ? va.localeCompare(vb)
+      : vb.localeCompare(va);
+  });
+
+  const hasFilters = search || posFilter !== 'All' || yearFilter;
+
+  function SortTh({col, label}) {
+    const active = sortCol === col;
+    return (
+      <th onClick={()=>handleSort(col)} style={{whiteSpace:'nowrap'}}>
+        {label}
+        <span className={`sort-arrow${active?' active':''}`}>
+          {active ? (sortDir === 'asc' ? ' ↑' : ' ↓') : ' ↕'}
+        </span>
+      </th>
+    );
+  }
 
   return (
     <main className="container">
@@ -912,7 +981,7 @@ function PlayersPage() {
       <div className="players-decade-tabs">
         {DECADES.map(d=>(
           <button key={d} className={'decade-tab'+(decade===d?' active':'')}
-            onClick={()=>{ setDecade(d); setSearch(''); }}>
+            onClick={()=>{ setDecade(d); clearFilters(); }}>
             {d}
           </button>
         ))}
@@ -920,15 +989,46 @@ function PlayersPage() {
 
       {PLAYERS_BY_DECADE[decade] ? (
         <>
-          <input className="players-search" placeholder="Filter by name or position…"
-            value={search} onChange={e=>setSearch(e.target.value)} />
-          <div className="players-count">{sorted.length} player{sorted.length!==1?'s':''}</div>
+          <div className="players-filters">
+            <input
+              className="players-search"
+              placeholder="Search by name…"
+              value={search}
+              onChange={e=>setSearch(e.target.value)}
+            />
+            <select
+              className="players-select"
+              value={posFilter}
+              onChange={e=>setPosFilter(e.target.value)}
+            >
+              {positions.map(p=><option key={p} value={p}>{p === 'All' ? 'All Positions' : p}</option>)}
+            </select>
+            <input
+              className="players-year-input"
+              placeholder="Year (e.g. 2021)"
+              value={yearFilter}
+              onChange={e=>setYearFilter(e.target.value)}
+              maxLength={4}
+              type="number"
+              min="1960"
+              max={new Date().getFullYear()}
+            />
+            {hasFilters && (
+              <button className="filter-clear" onClick={clearFilters}>✕ Clear</button>
+            )}
+          </div>
+
+          <div className="players-count">
+            {sorted.length} player{sorted.length!==1?'s':''}
+            {hasFilters && ` matching filters`}
+          </div>
+
           <table className="players-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Years with Bills</th>
+                <SortTh col="name" label="Name" />
+                <SortTh col="pos"  label="Position" />
+                <SortTh col="years" label="Years with Bills" />
               </tr>
             </thead>
             <tbody>
@@ -939,6 +1039,13 @@ function PlayersPage() {
                   <td style={{color:MUTED,fontSize:13}}>{p.years}</td>
                 </tr>
               ))}
+              {sorted.length === 0 && (
+                <tr>
+                  <td colSpan={3} style={{textAlign:'center',color:MUTED,fontStyle:'italic',padding:'24px'}}>
+                    No players match your filters.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </>
