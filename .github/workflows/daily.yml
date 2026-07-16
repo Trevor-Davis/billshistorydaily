@@ -42,6 +42,8 @@ jobs:
       - name: Fetch previous day's Bills news
         run: |
           INPUT_DATE="${{ github.event.inputs.date }}"
+          echo "Raw input date: '$INPUT_DATE'"
+          echo "Date length: ${#INPUT_DATE}"
           if [ -n "$INPUT_DATE" ]; then
             echo "Fetching for specified date: $INPUT_DATE"
             node scripts/fetch-daily.js "$INPUT_DATE"
