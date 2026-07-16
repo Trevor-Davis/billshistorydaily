@@ -3,3 +3,4 @@ build/
 .env
 .env.local
 getdates.ps1
+APIKeys.txt
