@@ -225,9 +225,53 @@ function deduplicateArticles(articles) {
   for (const article of articles) {
     const isDuplicate = deduped.some(kept => titleSimilarity(article.title, kept.title) > 0.6);
     if (!isDuplicate) deduped.push(article);
-    else console.log(`  Deduped: "${article.title.substring(0, 60)}"`);
+    else console.log(`  Deduped (same-day): "${article.title.substring(0, 60)}"`);
   }
   return deduped;
+}
+
+// ── Cross-day deduplication against yesterday's published articles ─────────────
+function removePreviousDayDuplicates(articles, dateKey) {
+  function normalizeTitle(t) {
+    return t.toLowerCase().replace(/[^a-z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+  }
+  function titleSimilarity(a, b) {
+    const wa = new Set(normalizeTitle(a).split(' ').filter(w => w.length > 3));
+    const wb = new Set(normalizeTitle(b).split(' ').filter(w => w.length > 3));
+    const intersection = [...wa].filter(w => wb.has(w)).length;
+    const union = new Set([...wa, ...wb]).size;
+    return union === 0 ? 0 : intersection / union;
+  }
+
+  // Load yesterday's published articles
+  let yesterdayArticles = [];
+  try {
+    const d = new Date(dateKey + 'T12:00:00');
+    d.setDate(d.getDate() - 1);
+    const yKey = d.toISOString().split('T')[0];
+    const yPath = path.join(__dirname, '..', 'public', 'data', `${yKey}.json`);
+    if (fs.existsSync(yPath)) {
+      const yData = JSON.parse(fs.readFileSync(yPath, 'utf8'));
+      yesterdayArticles = yData.articles || [];
+      console.log(`Cross-day dedup: checking against ${yesterdayArticles.length} articles from ${yKey}`);
+    }
+  } catch(e) {
+    console.log('Could not load yesterday\'s articles for cross-day dedup:', e.message);
+  }
+
+  if (yesterdayArticles.length === 0) return articles;
+
+  const filtered = articles.filter(article => {
+    const isCrossDedup = yesterdayArticles.some(prev =>
+      titleSimilarity(article.title, prev.title) > 0.6
+    );
+    if (isCrossDedup) console.log(`  Deduped (cross-day): "${article.title.substring(0, 60)}"`);
+    return !isCrossDedup;
+  });
+
+  const removed = articles.length - filtered.length;
+  if (removed > 0) console.log(`Cross-day dedup removed ${removed} article(s) also covered yesterday.`);
+  return filtered;
 }
 
 // ── Save pending file ─────────────────────────────────────────────────────────
@@ -287,8 +331,11 @@ function savePending(dateKey, articles) {
       }
     } catch(e) { console.warn('Could not parse web search articles:', e.message); }
 
-    // Merge and deduplicate
-    const allArticles = deduplicateArticles([...rssArticles, ...webArticles]);
+    // Merge and deduplicate (same-day)
+    const sameDayDeduped = deduplicateArticles([...rssArticles, ...webArticles]);
+
+    // Remove articles too similar to yesterday's published coverage
+    const allArticles = removePreviousDayDuplicates(sameDayDeduped, dateKey);
 
     // Try to find an image from the first few articles
     let imageUrl = '';
