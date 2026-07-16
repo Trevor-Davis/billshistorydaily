@@ -40,7 +40,15 @@ jobs:
         run: git pull origin main
 
       - name: Fetch previous day's Bills news
-        run: node scripts/fetch-daily.js "${{ github.event.inputs.date }}"
+        run: |
+          INPUT_DATE="${{ github.event.inputs.date }}"
+          if [ -n "$INPUT_DATE" ]; then
+            echo "Fetching for specified date: $INPUT_DATE"
+            node scripts/fetch-daily.js "$INPUT_DATE"
+          else
+            echo "Fetching for yesterday (default)"
+            node scripts/fetch-daily.js
+          fi
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
