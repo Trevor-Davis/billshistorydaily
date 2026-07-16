@@ -182,9 +182,9 @@ async function generatePreview(selected) {
   setState({ generating: true });
   const titles = [...selected].map(i => `- ${state.articles[i].title} (${state.articles[i].source})`).join('\n');
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://billshistorydaily-apiproxy.vercel.app/api/claude', {
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':state.apiKey,'anthropic-version':'2023-06-01'},
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
       body: JSON.stringify({
         model:'claude-sonnet-4-6', max_tokens:200,
         messages:[{role:'user',content:`Based on these Buffalo Bills articles:\n${titles}\n\nWrite a punchy 6-10 word newspaper headline. Respond with ONLY the headline, nothing else.`}]
@@ -214,9 +214,9 @@ async function publish() {
     const headlineTitles = headlineArticles.map(a => `- ${a.title} (${a.source})`).join('\n');
     const writeupTitles  = writeupArticles.map(a => `- ${a.title} (${a.source})`).join('\n');
 
-    const genRes = await fetch('https://api.anthropic.com/v1/messages', {
+    const genRes = await fetch('https://billshistorydaily-apiproxy.vercel.app/api/claude', {
       method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
       body: JSON.stringify({
         model:'claude-sonnet-4-6', max_tokens:1000,
         messages:[{role:'user',content:`You are writing content for Bills History Daily, a Buffalo Bills news archive.
