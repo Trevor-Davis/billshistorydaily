@@ -1,37 +1,25 @@
 {
   "dateKey": "2026-07-18",
   "date": "July 18, 2026",
-  "fetchedAt": "2026-07-19T18:25:42.416Z",
+  "fetchedAt": "2026-07-19T18:48:29.369Z",
   "articles": [
-    {
-      "title": "Bills Mafia confident in Keon Coleman for 2026 season",
-      "source": "Buffalo Rumblings",
-      "url": "https://www.buffalorumblings.com/buffalo-bills-analysis/136963/bills-mafia-confident-in-keon-coleman-for-2026-season",
-      "imageUrl": "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/07/gettyimages-2256812685.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.744114399687%2C100%2C78.511771200627&amp;w=1200"
-    },
-    {
-      "title": "Plays That Defined 2025: Cincinnati Bengals at Buffalo Bills, Week 14",
-      "source": "Buffalo Rumblings",
-      "url": "https://www.buffalorumblings.com/buffalo-bills-analysis/135968/plays-that-defined-2025-cincinnati-bengals-at-buffalo-bills-week-14",
-      "imageUrl": "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2025/12/gettyimages-2250587947.jpg?quality=90&amp;strip=all&amp;crop=9.4%2C11.734926096883%2C73%2C57.329847801547&amp;w=1200"
-    },
     {
       "title": "Buffalo Bills 2026 scouting report: center Lloyd Cushenberry",
       "source": "Buffalo Rumblings",
       "url": "https://www.buffalorumblings.com/buffalo-bills-analysis/136885/buffalo-bills-2026-scouting-report-center-lloyd-cushenberry",
-      "imageUrl": "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/07/imagn-24697215.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.737319836498%2C100%2C78.525360327004&amp;w=1200"
+      "imageUrl": "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/07/imagn-24697215.jpg?quality=90&strip=all&crop=0%2C10.737319836498%2C100%2C78.525360327004&w=1200"
     },
     {
       "title": "Bills news: How is Keon Coleman preparing for pivotal season?",
       "source": "Buffalo Rumblings",
       "url": "https://www.buffalorumblings.com/buffalo-bills-news/136828/bills-news-how-is-keon-coleman-preparing-for-pivotal-season",
-      "imageUrl": "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/06/gettyimages-2254669151.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.727928671241%2C100%2C78.544142657518&amp;w=1200"
+      "imageUrl": "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/06/gettyimages-2254669151.jpg?quality=90&strip=all&crop=0%2C10.727928671241%2C100%2C78.544142657518&w=1200"
     },
     {
       "title": "Buffalo Bills 2026 scouting report: cornerback Toriano Pride Jr.",
       "source": "Buffalo Rumblings",
       "url": "https://www.buffalorumblings.com/buffalo-bills-analysis/136910/buffalo-bills-2026-scouting-report-cornerback-toriano-pride-jr",
-      "imageUrl": "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/07/imagn-27602051.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.724700112665%2C100%2C78.55059977467&amp;w=1200"
+      "imageUrl": "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/07/imagn-27602051.jpg?quality=90&strip=all&crop=0%2C10.724700112665%2C100%2C78.55059977467&w=1200"
     },
     {
       "title": "Bills debut new fitness trail surrounding Highmark Stadium",
@@ -46,6 +34,18 @@
       "imageUrl": "https://nbcsports.brightspotcdn.com/dims4/default/c927c25/2147483647/strip/true/crop/2312x1301+0+0/resize/1440x810!/quality/90/?url=https%3A%2F%2Fnbc-sports-production-nbc-sports.s3.us-east-1.amazonaws.com%2Fbrightspot%2F6a%2F30%2F563ca5a14d6fb4c7b3797d4e4a1d%2Fhttps-delivery-gettyimages.com%2Fdownloads%2F112961440"
     },
     {
+      "title": "Why Bills' Dion Dawkins focused on his weight ahead of 2026 NFL season",
+      "source": "USA Today",
+      "url": "https://billswire.usatoday.com/story/sports/nfl/bills/2026/07/19/why-bills-dion-dawkins-focused-on-his-weight-ahead-of-2026-nfl-season/90967429007/",
+      "imageUrl": "https://billswire.usatoday.com/gcdn/authoring/authoring-images/2025/11/08/USAT/87165109007-usatsi-27194289.jpg?crop=6191,3483,x0,y322&width=3200&height=1801&format=pjpg&auto=webp"
+    },
+    {
+      "title": "Bills Mafia confident in Keon Coleman for 2026 season",
+      "source": "Msn",
+      "url": "https://www.msn.com/en-us/sports/nfl/bills-mafia-confident-in-keon-coleman-for-2026-season/ar-AA28fazz?ocid=BingNewsVerp",
+      "imageUrl": "https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA28f0wR.img?w=768&h=512&m=4&q=88"
+    },
+    {
       "title": "New Highmark Stadium purposefully designed with this in mind",
       "source": "USA Today",
       "url": "https://billswire.usatoday.com/story/sports/nfl/bills/2026/07/19/nfl-afc-buffalo-bills-highmark-stadium-football-josh-allen-architecture/90967471007/",
@@ -56,6 +56,12 @@
       "source": "Sports",
       "url": "https://sports.yahoo.com/articles/o-j-simpson-buffalo-bills-143859093.html",
       "imageUrl": "https://s.yimg.com/ny/api/res/1.2/.VKHvlK3f9fGJoeE2oKfdw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD02NzU7Y2Y9d2VicA--/https:/media.zenfs.com/en/complex_131/3b2652d0fffa9ea0d0a3f97124752612"
+    },
+    {
+      "title": "Plays That Defined 2025: Cincinnati Bengals at Buffalo Bills, Week 14",
+      "source": "Buffalo Rumblings",
+      "url": "https://www.buffalorumblings.com/buffalo-bills-analysis/135968/plays-that-defined-2025-cincinnati-bengals-at-buffalo-bills-week-14",
+      "imageUrl": "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2025/12/gettyimages-2250587947.jpg?quality=90&strip=all&crop=9.4%2C11.734926096883%2C73%2C57.329847801547&w=1200"
     },
     {
       "title": "Vote for the play that best highlights Bills win over the Bengals",
@@ -220,6 +226,12 @@
       "imageUrl": "https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA27KaCu.img?w=768&h=512&m=4&q=79"
     },
     {
+      "title": "BLOCKBUSTER DEAL! BLAKE CASHMAN  SIGNING WITH THE BILLS IN A HISTORIC TRADE?! BUFFALO BILLS NEWS",
+      "source": "YouTube",
+      "url": "https://www.youtube.com/watch?v=PWf_21kdHSo",
+      "imageUrl": "https://i.ytimg.com/vi_webp/PWf_21kdHSo/maxresdefault.webp"
+    },
+    {
       "title": "Have The Buffalo Bills Done Enough?",
       "source": "YouTube",
       "url": "https://www.youtube.com/watch?v=7fzUYLZS1GU",
@@ -305,17 +317,17 @@
     }
   ],
   "images": [
-    "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/07/gettyimages-2256812685.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.744114399687%2C100%2C78.511771200627&amp;w=1200",
-    "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2025/12/gettyimages-2250587947.jpg?quality=90&amp;strip=all&amp;crop=9.4%2C11.734926096883%2C73%2C57.329847801547&amp;w=1200",
-    "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/07/imagn-24697215.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.737319836498%2C100%2C78.525360327004&amp;w=1200",
-    "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/06/gettyimages-2254669151.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.727928671241%2C100%2C78.544142657518&amp;w=1200",
-    "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/07/imagn-27602051.jpg?quality=90&amp;strip=all&amp;crop=0%2C10.724700112665%2C100%2C78.55059977467&amp;w=1200",
+    "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/07/imagn-24697215.jpg?quality=90&strip=all&crop=0%2C10.737319836498%2C100%2C78.525360327004&w=1200",
+    "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/06/gettyimages-2254669151.jpg?quality=90&strip=all&crop=0%2C10.727928671241%2C100%2C78.544142657518&w=1200",
+    "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2026/07/imagn-27602051.jpg?quality=90&strip=all&crop=0%2C10.724700112665%2C100%2C78.55059977467&w=1200",
     "https://static.clubs.nfl.com/image/upload/t_editorial_landscape_12_desktop/bills/exmxdi9v5avvjanbricz",
     "https://nbcsports.brightspotcdn.com/dims4/default/c927c25/2147483647/strip/true/crop/2312x1301+0+0/resize/1440x810!/quality/90/?url=https%3A%2F%2Fnbc-sports-production-nbc-sports.s3.us-east-1.amazonaws.com%2Fbrightspot%2F6a%2F30%2F563ca5a14d6fb4c7b3797d4e4a1d%2Fhttps-delivery-gettyimages.com%2Fdownloads%2F112961440",
+    "https://billswire.usatoday.com/gcdn/authoring/authoring-images/2025/11/08/USAT/87165109007-usatsi-27194289.jpg?crop=6191,3483,x0,y322&width=3200&height=1801&format=pjpg&auto=webp",
+    "https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA28f0wR.img?w=768&h=512&m=4&q=88",
     "https://billswire.usatoday.com/gcdn/authoring/authoring-images/2026/07/18/SHUD/90964832007-usatsi-27766497.jpg?crop=4973,2797,x0,y259&width=3200&height=1800&format=pjpg&auto=webp",
     "https://s.yimg.com/ny/api/res/1.2/.VKHvlK3f9fGJoeE2oKfdw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD02NzU7Y2Y9d2VicA--/https:/media.zenfs.com/en/complex_131/3b2652d0fffa9ea0d0a3f97124752612",
+    "https://platform.buffalorumblings.com/wp-content/uploads/sites/51/2025/12/gettyimages-2250587947.jpg?quality=90&strip=all&crop=9.4%2C11.734926096883%2C73%2C57.329847801547&w=1200",
     "https://s.yimg.com/ny/api/res/1.2/oz0mNNUamfhRSpC2qGhsZg--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD03ODk7Y2Y9d2VicA--/https:/media.zenfs.com/en/sb_nation_articles_115/ec8e4de53a5905f860daa169db143d41",
-    "https://s.yimg.com/lo/mysterio/api/1e6f23e136fe13285a8d19d6eca86ef53d10a64a1896b1da261ce7bab1846110/lightyear_networkapi/resizefill_w1200;quality_80;format_webp/https:%2F%2Fmedia.zenfs.com%2Fen%2Fessentiallysports_articles_591%2Fb2a318ff72ed1107f90fefdee9224dbf",
-    "https://img-s-msn-com.akamaized.net/tenant/amp/entityid/AA28dIDh.img?w=768&h=432&m=4&q=70"
+    "https://s.yimg.com/lo/mysterio/api/1e6f23e136fe13285a8d19d6eca86ef53d10a64a1896b1da261ce7bab1846110/lightyear_networkapi/resizefill_w1200;quality_80;format_webp/https:%2F%2Fmedia.zenfs.com%2Fen%2Fessentiallysports_articles_591%2Fb2a318ff72ed1107f90fefdee9224dbf"
   ]
 }
