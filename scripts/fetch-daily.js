@@ -353,17 +353,22 @@ function savePending(dateKey, articles, images = []) {
       articlesWithImages.push({ ...article, imageUrl: article.image || '' });
     }
 
-    // Collect unique images for the photo picker
+    // Collect unique images for the photo picker (decode HTML entities)
+    const decodeUrl = url => url.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
     const images = [...new Set(
       articlesWithImages
         .map(a => a.imageUrl)
         .filter(url => url && url.startsWith('http'))
+        .map(decodeUrl)
     )].slice(0, 12); // max 12 photos to pick from
 
     console.log(`Found ${images.length} unique images for photo picker`);
 
-    // Clean up article objects
-    const cleanArticles = articlesWithImages.map(({ title, source, url, imageUrl }) => ({ title, source, url, imageUrl }));
+    // Clean up article objects (decode HTML entities in imageUrl)
+    const cleanArticles = articlesWithImages.map(({ title, source, url, imageUrl }) => ({
+      title, source, url,
+      imageUrl: imageUrl ? imageUrl.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') : ''
+    }));
 
     savePending(dateKey, cleanArticles, images);
 

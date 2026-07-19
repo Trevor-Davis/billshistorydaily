@@ -146,7 +146,9 @@ async function loadArticles() {
     const res = await fetch(`/pending/${state.date}.json?t=${Date.now()}`);
     if (!res.ok) throw new Error(`No pending articles for ${state.date}. Run the fetch workflow first.`);
     const data = await res.json();
-    setState({ loading:false, articles: data.articles||[], images: data.images||[], selectedImage:null, status:{ type:'info', msg:`${data.articles.length} articles found for ${data.date}. Select which to include.` }});
+    const decodeUrl = url => url ? url.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') : '';
+    const cleanImages = (data.images||[]).map(decodeUrl).filter(Boolean);
+    setState({ loading:false, articles: data.articles||[], images: cleanImages, selectedImage:null, status:{ type:'info', msg:`${data.articles.length} articles found for ${data.date}. Select which to include.` }});
   } catch(e) {
     setState({ loading:false, status:{ type:'error', msg:e.message }});
   }
