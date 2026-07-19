@@ -354,7 +354,7 @@ function checkIcon(color) {
 }
 
 function render() {
-  const { date, articles, headline, writeup, list, loading, publishing, generating, status, preview, apiKey, githubToken } = state;
+  const { date, articles, images, selectedImage, headline, writeup, list, loading, publishing, generating, status, preview, apiKey, githubToken } = state;
   const canPublish = headline.size > 0 && list.size > 0 && !publishing;
 
   document.getElementById('app').innerHTML = `
