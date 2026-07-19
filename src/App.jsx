@@ -110,6 +110,9 @@ const style = `
   .detail-error { font-size:14px; color:${RED}; padding:20px 0; font-style:italic; }
   .detail-writeup { font-size:15px; line-height:1.8; color:${TEXT}; font-weight:300; margin-bottom:32px; padding-bottom:28px; border-bottom:1px solid ${BORDER}; font-style:italic; }
   .articles-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:${MUTED}; margin-bottom:14px; font-weight:600; }
+  .article-groups { display:flex; flex-direction:column; gap:24px; }
+  .article-group { }
+  .article-group-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${BLUE}; font-weight:700; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid ${BLUE}; }
   .detail-refresh { display:inline-flex; align-items:center; gap:8px; margin-top:14px; padding:7px 16px; font-size:10px; letter-spacing:2px; text-transform:uppercase; background:${BG}; border:1px solid ${BORDER}; color:${BLUE}; cursor:pointer; font-family:'Source Serif 4',serif; border-radius:2px; transition:background 0.15s; }
   .detail-refresh:hover { background:${BG_ALT}; }
 
@@ -584,17 +587,41 @@ function DayDetailPage({dayKey, onBack}) {
           {data.articles && data.articles.length>0 && data.articles[0].title!=='No coverage found' && (
             <div className="articles-label">Coverage from this day</div>
           )}
-          <ul className="article-list">
-            {(data.articles||[]).map((a,ai)=>(
-              <li key={ai} className="article-item">
-                <div className="article-bullet"/>
-                {a.url
-                  ?<a className="article-link" href={a.url} target="_blank" rel="noopener noreferrer">{a.title}</a>
-                  :<span className="article-link" style={{cursor:'default',color:'#6b7280'}}>{a.title}</span>}
-                <span className="article-source">{a.source}</span>
-              </li>
-            ))}
-          </ul>
+
+          {/* Grouped articles (new format) */}
+          {data.groups && data.groups.length>0 ? (
+            <div className="article-groups">
+              {data.groups.map((group, gi) => (
+                <div key={gi} className="article-group">
+                  <div className="article-group-label">{group.topic}</div>
+                  <ul className="article-list">
+                    {(group.articles||[]).map((a,ai)=>(
+                      <li key={ai} className="article-item">
+                        <div className="article-bullet"/>
+                        {a.url
+                          ?<a className="article-link" href={a.url} target="_blank" rel="noopener noreferrer">{a.title}</a>
+                          :<span className="article-link" style={{cursor:'default',color:'#6b7280'}}>{a.title}</span>}
+                        <span className="article-source">{a.source}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Flat list (legacy format) */
+            <ul className="article-list">
+              {(data.articles||[]).map((a,ai)=>(
+                <li key={ai} className="article-item">
+                  <div className="article-bullet"/>
+                  {a.url
+                    ?<a className="article-link" href={a.url} target="_blank" rel="noopener noreferrer">{a.title}</a>
+                    :<span className="article-link" style={{cursor:'default',color:'#6b7280'}}>{a.title}</span>}
+                  <span className="article-source">{a.source}</span>
+                </li>
+              ))}
+            </ul>
+          )}
           <button className="detail-refresh" onClick={load} style={{marginTop:16}}>↻ Refresh from web</button>
         </>
       )}

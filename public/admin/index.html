@@ -255,7 +255,7 @@ Rules:
 - headline: 6-10 words max, no period, based only on featured articles
 - themes: exactly 3 short noun phrases (3-5 words each) from the featured articles
 - writeup: flowing narrative covering the full scope of the writeup articles
-- Respond ONLY with the JSON object.`}]
+-,\n  \"groups\": [{ \"topic\": \"Topic\", \"indices\": [0] }] groups: group the coverage list articles by topic. Each group needs a topic name (2-4 words) and indices array (0-based positions in the list below). Every article in exactly one group. As many groups as needed.\n\nCOVERAGE LIST:\n${listArticles.map((a,i)=>`${i}: ${a.title}`).join("\\n")}\n\nAdd groups to the JSON like: \"groups\": [{ \"topic\": \"Josh Allen\", \"indices\": [0,2] }]\n- Respond ONLY with the JSON object.`}]
       })
     });
 
@@ -275,11 +275,22 @@ Rules:
     // selectedImage === 'default' means use empty string so app shows defaultimage.jpeg
 
     // Build final day JSON
+    // Convert group indices to actual article objects
+    const groupedArticles = (generated.groups||[]).map(g=>({
+      topic: g.topic,
+      articles: (g.indices||[]).map(i=>listArticles[i]).filter(Boolean).map(({title,source,url})=>({title,source,url}))
+    })).filter(g=>g.articles.length>0);
+    // Fallback if Claude didn't return groups
+    const finalGroups = groupedArticles.length>0
+      ? groupedArticles
+      : [{ topic: 'Coverage', articles: listArticles.map(({title,source,url})=>({title,source,url})) }];
+
     const dayData = {
       headline: generated.headline,
       themes:   generated.themes,
       writeup:  generated.writeup,
       imageUrl,
+      groups:   finalGroups,
       articles: listArticles.map(({ title, source, url }) => ({ title, source, url })),
     };
 
