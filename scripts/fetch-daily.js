@@ -275,14 +275,15 @@ function removePreviousDayDuplicates(articles, dateKey) {
 }
 
 // ── Save pending file ─────────────────────────────────────────────────────────
-function savePending(dateKey, articles) {
+function savePending(dateKey, articles, images = []) {
   const pendingDir = path.join(__dirname, '..', 'public', 'pending');
   fs.mkdirSync(pendingDir, { recursive: true });
   const filePath = path.join(pendingDir, `${dateKey}.json`);
-  const data = { dateKey, date: readableDate(dateKey), fetchedAt: new Date().toISOString(), articles };
+  const data = { dateKey, date: readableDate(dateKey), fetchedAt: new Date().toISOString(), articles, images };
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
   console.log(`✓ Saved pending: ${filePath}`);
   console.log(`  ${articles.length} articles ready for review`);
+  console.log(`  ${images.length} photos available to pick from`);
   console.log(`  Admin URL: https://billshistorydaily.com/admin`);
 }
 
@@ -337,23 +338,34 @@ function savePending(dateKey, articles) {
     // Remove articles too similar to yesterday's published coverage
     const allArticles = removePreviousDayDuplicates(sameDayDeduped, dateKey);
 
-    // Try to find an image from the first few articles
-    let imageUrl = '';
-    const preSupplied = allArticles.find(a => a.image)?.image;
-    if (preSupplied) {
-      imageUrl = preSupplied;
-    } else {
-      for (const a of allArticles.slice(0, 5)) {
-        if (!a.url) continue;
-        const img = await extractOgImage(a.url);
-        if (img) { imageUrl = img; break; }
+    // Try to extract images from articles
+    console.log('\nStep 3: Extracting article images...');
+    const articlesWithImages = [];
+    for (const article of allArticles.slice(0, 20)) { // check first 20 articles
+      let imageUrl = article.image || '';
+      if (!imageUrl && article.url) {
+        imageUrl = await extractOgImage(article.url) || '';
       }
+      articlesWithImages.push({ ...article, imageUrl });
+    }
+    // Add remaining articles without images
+    for (const article of allArticles.slice(20)) {
+      articlesWithImages.push({ ...article, imageUrl: article.image || '' });
     }
 
-    // Clean up image field from articles before saving
-    const cleanArticles = allArticles.map(({ title, source, url }) => ({ title, source, url }));
+    // Collect unique images for the photo picker
+    const images = [...new Set(
+      articlesWithImages
+        .map(a => a.imageUrl)
+        .filter(url => url && url.startsWith('http'))
+    )].slice(0, 12); // max 12 photos to pick from
 
-    savePending(dateKey, cleanArticles.map(a => ({ ...a, imageUrl: imageUrl || '' })));
+    console.log(`Found ${images.length} unique images for photo picker`);
+
+    // Clean up article objects
+    const cleanArticles = articlesWithImages.map(({ title, source, url, imageUrl }) => ({ title, source, url, imageUrl }));
+
+    savePending(dateKey, cleanArticles, images);
 
     console.log('\n✓ Done. Visit /admin to review and publish.');
   } catch (err) {
