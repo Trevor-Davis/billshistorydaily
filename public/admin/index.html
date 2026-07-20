@@ -235,7 +235,7 @@ async function publish() {
       method:'POST',
       headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01'},
       body: JSON.stringify({
-        model:'claude-sonnet-4-6', max_tokens:1000,
+        model:'claude-sonnet-4-6', max_tokens:3000,
         messages:[{role:'user',content:`You are writing content for Bills History Daily, a Buffalo Bills news archive.
 
 FEATURED articles (use ONLY these for the headline and themes):
@@ -263,7 +263,14 @@ Rules:
     const genText = genData.content?.[0]?.text || '';
     const match = genText.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('Could not generate content. Please try again.');
-    const generated = JSON.parse(match[0]);
+    let generated;
+    try {
+      generated = JSON.parse(match[0]);
+    } catch(parseErr) {
+      let fixed = match[0].replace(/,\s*}/g,'}').replace(/,\s*]/g,']');
+      try { generated = JSON.parse(fixed); }
+      catch(e2) { throw new Error('JSON parse failed: '+parseErr.message); }
+    }
 
     // Get image — use manually selected photo, or fall back to first article image
     let imageUrl = '';
