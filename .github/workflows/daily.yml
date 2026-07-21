@@ -64,9 +64,8 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    # Run deploy after fetch OR when editorial-publish is triggered
-    needs: []
-    if: always()
+    needs: [fetch]
+    if: always() && (needs.fetch.result == 'success' || github.event_name == 'repository_dispatch')
     permissions:
       contents: write
     steps:
