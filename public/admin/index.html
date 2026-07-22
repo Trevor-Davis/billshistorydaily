@@ -143,9 +143,21 @@ function setState(u) { Object.assign(state, u); render(); }
 async function loadArticles() {
   setState({ loading:true, status:null, articles:[], images:[], selectedImage:null, headline:new Set(), writeup:new Set(), list:new Set(), preview:null });
   try {
-    const res = await fetch(`/pending/${state.date}.json?t=${Date.now()}`);
-    if (!res.ok) throw new Error(`No pending articles for ${state.date}. Run the fetch workflow first.`);
-    const data = await res.json();
+    // Read directly from GitHub API so we always get latest main branch
+    let data;
+    if (state.githubToken) {
+      const ghRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/public/pending/${state.date}.json`, {
+        headers: { Authorization: `token ${state.githubToken}`, Accept: 'application/vnd.github.v3+json' }
+      });
+      if (!ghRes.ok) throw new Error(`No pending articles for ${state.date}. Run the fetch workflow first.`);
+      const ghData = await ghRes.json();
+      const decoded = decodeURIComponent(escape(atob(ghData.content.replace(/\n/g, ''))));
+      data = JSON.parse(decoded);
+    } else {
+      const res = await fetch(`/pending/${state.date}.json?t=${Date.now()}`);
+      if (!res.ok) throw new Error(`No pending articles for ${state.date}. Run the fetch workflow first.`);
+      data = await res.json();
+    }
     const decodeUrl = url => url ? url.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') : '';
     const cleanImages = (data.images||[]).map(decodeUrl).filter(Boolean);
     setState({ loading:false, articles: data.articles||[], images: cleanImages, selectedImage:null, status:{ type:'info', msg:`${data.articles.length} articles found for ${data.date}. Select which to include.` }});
