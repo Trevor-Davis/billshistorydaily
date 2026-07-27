@@ -4,3 +4,4 @@ build/
 .env.local
 getdates.ps1
 APIKeys.txt
+bills-history-daily-overview.txt
