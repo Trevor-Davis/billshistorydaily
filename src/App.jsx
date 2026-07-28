@@ -116,7 +116,7 @@ const style = `
   .topic-index-item { font-size:12px; padding:4px 12px; background:white; border:1px solid #bfdbfe; border-radius:20px; color:${BLUE}; text-decoration:none; font-weight:600; transition:background 0.15s,color 0.15s; }
   .topic-index-item:hover { background:${BLUE}; color:white; border-color:${BLUE}; }
   .article-groups { display:flex; flex-direction:column; gap:24px; }
-  .article-group { scroll-margin-top:20px; }
+  .article-group { scroll-margin-top:170px; }
   .article-group-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${BLUE}; font-weight:700; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid ${BLUE}; }
   .detail-refresh { display:inline-flex; align-items:center; gap:8px; margin-top:14px; padding:7px 16px; font-size:10px; letter-spacing:2px; text-transform:uppercase; background:${BG}; border:1px solid ${BORDER}; color:${BLUE}; cursor:pointer; font-family:'Source Serif 4',serif; border-radius:2px; transition:background 0.15s; }
   .detail-refresh:hover { background:${BG_ALT}; }
