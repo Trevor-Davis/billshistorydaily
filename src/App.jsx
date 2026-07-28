@@ -569,6 +569,93 @@ function DayDetailPage({dayKey, onBack}) {
 
   useEffect(()=>{ load(); },[dayKey]);
 
+  // Update page title and meta description when data loads
+  useEffect(()=>{
+    const dateStr = date.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    if (data) {
+      // Title: headline | date | Bills History Daily
+      document.title = data.headline
+        ? `${data.headline} | ${dateStr} | Bills History Daily`
+        : `Buffalo Bills News — ${dateStr} | Bills History Daily`;
+
+      // Meta description: writeup trimmed to ~155 chars
+      let desc = data.writeup
+        ? data.writeup.substring(0, 155).replace(/\s+\S*$/, '') + '…'
+        : `Buffalo Bills news and coverage from ${dateStr}.`;
+      let meta = document.querySelector('meta[name="description"]');
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.name = 'description';
+        document.head.appendChild(meta);
+      }
+      meta.content = desc;
+
+      // Open Graph tags for social sharing
+      const ogTags = {
+        'og:title':       document.title,
+        'og:description': desc,
+        'og:type':        'article',
+        'og:url':         window.location.href,
+        'og:image':       data.imageUrl || '/images/defaultimage.jpeg',
+        'twitter:card':   'summary_large_image',
+        'twitter:title':  document.title,
+        'twitter:description': desc,
+        'twitter:image':  data.imageUrl || '/images/defaultimage.jpeg',
+      };
+      Object.entries(ogTags).forEach(([prop, val]) => {
+        const attr = prop.startsWith('og:') ? 'property' : 'name';
+        let tag = document.querySelector(`meta[${attr}="${prop}"]`);
+        if (!tag) {
+          tag = document.createElement('meta');
+          tag.setAttribute(attr, prop);
+          document.head.appendChild(tag);
+        }
+        tag.content = val;
+      });
+      // JSON-LD structured data for Google
+      const existingLd = document.querySelector('script[type="application/ld+json"]');
+      if (existingLd) existingLd.remove();
+      const ld = document.createElement('script');
+      ld.type = 'application/ld+json';
+      ld.text = JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "headline": data.headline || `Buffalo Bills News — ${dateStr}`,
+        "description": desc,
+        "datePublished": new Date(dayKey + 'T12:00:00').toISOString(),
+        "dateModified": new Date(dayKey + 'T12:00:00').toISOString(),
+        "image": data.imageUrl ? [data.imageUrl] : ['https://billshistorydaily.com/images/defaultimage.jpeg'],
+        "author": {
+          "@type": "Organization",
+          "name": "Bills History Daily",
+          "url": "https://billshistorydaily.com"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Bills History Daily",
+          "url": "https://billshistorydaily.com",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://billshistorydaily.com/favicon-180.png"
+          }
+        },
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": window.location.href
+        }
+      });
+      document.head.appendChild(ld);
+
+    // Cleanup when leaving page
+    return () => {
+      document.title = 'Bills History Daily';
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.content = 'The Daily Archive of the Buffalo Bills';
+      const ldTag = document.querySelector('script[type="application/ld+json"]');
+      if (ldTag) ldTag.remove();
+    };
+  }, [data, dayKey]);
+
   return (
     <main className="container">
       <button className="detail-back" onClick={onBack}>← Back to Archive</button>
