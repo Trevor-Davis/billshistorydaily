@@ -110,8 +110,13 @@ const style = `
   .detail-error { font-size:14px; color:${RED}; padding:20px 0; font-style:italic; }
   .detail-writeup { font-size:15px; line-height:1.8; color:${TEXT}; font-weight:300; margin-bottom:32px; padding-bottom:28px; border-bottom:1px solid ${BORDER}; font-style:italic; }
   .articles-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:${MUTED}; margin-bottom:14px; font-weight:600; }
+  .topic-index { background:#f0f4ff; border:1px solid #bfdbfe; border-radius:6px; padding:16px 20px; margin-bottom:28px; }
+  .topic-index-label { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:${BLUE}; font-weight:700; margin-bottom:10px; }
+  .topic-index-list { display:flex; flex-wrap:wrap; gap:8px; }
+  .topic-index-item { font-size:12px; padding:4px 12px; background:white; border:1px solid #bfdbfe; border-radius:20px; color:${BLUE}; text-decoration:none; font-weight:600; transition:background 0.15s,color 0.15s; }
+  .topic-index-item:hover { background:${BLUE}; color:white; border-color:${BLUE}; }
   .article-groups { display:flex; flex-direction:column; gap:24px; }
-  .article-group { }
+  .article-group { scroll-margin-top:20px; }
   .article-group-label { font-size:11px; letter-spacing:2px; text-transform:uppercase; color:${BLUE}; font-weight:700; margin-bottom:10px; padding-bottom:6px; border-bottom:2px solid ${BLUE}; }
   .detail-refresh { display:inline-flex; align-items:center; gap:8px; margin-top:14px; padding:7px 16px; font-size:10px; letter-spacing:2px; text-transform:uppercase; background:${BG}; border:1px solid ${BORDER}; color:${BLUE}; cursor:pointer; font-family:'Source Serif 4',serif; border-radius:2px; transition:background 0.15s; }
   .detail-refresh:hover { background:${BG_ALT}; }
@@ -588,11 +593,25 @@ function DayDetailPage({dayKey, onBack}) {
             <div className="articles-label">Coverage from this day</div>
           )}
 
+          {/* Topic index — only show when there are multiple groups */}
+          {data.groups && data.groups.length>1 && (
+            <div className="topic-index">
+              <div className="topic-index-label">Topics covered</div>
+              <div className="topic-index-list">
+                {data.groups.map((group, gi) => (
+                  <a key={gi} className="topic-index-item" href={`#topic-${gi}`}>
+                    {group.topic}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Grouped articles (new format) */}
           {data.groups && data.groups.length>0 ? (
             <div className="article-groups">
               {data.groups.map((group, gi) => (
-                <div key={gi} className="article-group">
+                <div key={gi} id={`topic-${gi}`} className="article-group">
                   <div className="article-group-label">{group.topic}</div>
                   <ul className="article-list">
                     {(group.articles||[]).map((a,ai)=>(
@@ -1089,17 +1108,16 @@ function PlayersPage() {
 // ── DRAFT HISTORY PAGE ───────────────────────────────────────────────────────
 const DRAFT_HISTORY = [
   // 2026
-  {year:2026,round:1,pick:28,name:'TJ Parker',pos:'DE',college:'Clemson',years:'2026–present'},
-  {year:2026,round:2,pick:60,name:'Dillon Gabriel',pos:'QB',college:'Oregon',years:'2026–present'},
-  {year:2026,round:3,pick:91,name:'Richmond Vona',pos:'OT',college:'Oregon',years:'2026–present'},
-  {year:2026,round:4,pick:125,name:'Skyler Bell',pos:'WR',college:'UConn',years:'2026–present'},
-  {year:2026,round:5,pick:165,name:'Kaleb Elarms-Orr',pos:'LB',college:'Texas A&M',years:'2026–present'},
-  {year:2026,round:5,pick:168,name:'Jalon Kilgore',pos:'S',college:'Appalachian State',years:'2026–present'},
-  {year:2026,round:6,pick:182,name:'Zane Durant',pos:'DT',college:'Penn State',years:'2026–present'},
-  {year:2026,round:6,pick:189,name:'Jude Bowry',pos:'OT',college:'Boston College',years:'2026–present'},
-  {year:2026,round:7,pick:220,name:'Toriano Pride Jr.',pos:'CB',college:'Missouri',years:'2026–present'},
-  {year:2026,round:7,pick:237,name:'Tommy Doman',pos:'P',college:'Temple',years:'2026–present'},
-  {year:2026,round:7,pick:243,name:"Ar'maj Reed-Adams",pos:'OG',college:'Tennessee',years:'2026–present'},
+  {year:2026,round:2,pick:35, name:'TJ Parker',        pos:'OLB',college:'Clemson',          years:'2026–present'},
+  {year:2026,round:2,pick:62, name:'Davison Igbinosun', pos:'CB', college:'Oregon',            years:'2026–present'},
+  {year:2026,round:4,pick:102,name:'Jude Bowry',        pos:'OT', college:'Boston College',    years:'2026–present'},
+  {year:2026,round:4,pick:125,name:'Skyler Bell',        pos:'WR', college:'UConn',             years:'2026–present'},
+  {year:2026,round:4,pick:126,name:'Kaleb Elarms-Orr',  pos:'LB', college:'Texas A&M',         years:'2026–present'},
+  {year:2026,round:5,pick:167,name:'Jalon Kilgore',      pos:'S',  college:'Appalachian State', years:'2026–present'},
+  {year:2026,round:5,pick:181,name:'Zane Durant',        pos:'DT', college:'Penn State',        years:'2026–present'},
+  {year:2026,round:7,pick:220,name:'Toriano Pride Jr.',  pos:'CB', college:'Missouri',          years:'2026–present'},
+  {year:2026,round:7,pick:239,name:'Tommy Doman Jr.',    pos:'P',  college:'Temple',            years:'2026–present'},
+  {year:2026,round:7,pick:241,name:"Ar'maj Reed-Adams",  pos:'OG', college:'Tennessee',         years:'2026–present'},
   // 2025
   {year:2025,round:1,pick:30,name:'Maxwell Hairston',pos:'CB',college:'Kentucky',years:'2025–present'},
   {year:2025,round:2,pick:48,name:'Deone Walker',pos:'DT',college:'Michigan',years:'2025–present'},
