@@ -267,7 +267,7 @@ Rules:
 - headline: 6-10 words max, no period, based only on featured articles
 - themes: exactly 3 short noun phrases (3-5 words each) from the featured articles
 - writeup: flowing narrative covering the full scope of the writeup articles
--,\n  \"groups\": [{ \"topic\": \"Topic\", \"indices\": [0] }] groups: group the coverage list articles by topic. Each group needs a topic name (2-4 words) and indices array (0-based positions in the list below). Every article in exactly one group. As many groups as needed.\n\nCOVERAGE LIST:\n${listArticles.map((a,i)=>`${i}: ${a.title}`).join("\\n")}\n\nAdd groups to the JSON like: \"groups\": [{ \"topic\": \"Josh Allen\", \"indices\": [0,2] }]\n- Respond ONLY with the JSON object.`}]
+-,\n  \"groups\": [{ \"topic\": \"Topic\", \"indices\": [0] }] groups: group the coverage list articles into BROAD topic categories. Aim for 4-7 groups max — consolidate similar stories together (e.g. all uniform stories in one group, all Josh Allen stories together, all training camp stories together, all stadium stories together). Each group needs a short topic name (2-4 words) and an indices array (0-based positions in the list). Every article must appear in exactly one group.\n\nCOVERAGE LIST:\n${listArticles.map((a,i)=>`${i}: ${a.title}`).join("\\n")}\n\nAdd groups to the JSON like: \"groups\": [{ \"topic\": \"Josh Allen\", \"indices\": [0,2] }]\n- Respond ONLY with the JSON object.`}]
       })
     });
 
