@@ -645,6 +645,9 @@ function DayDetailPage({dayKey, onBack}) {
         }
       });
       document.head.appendChild(ld);
+    } else {
+      document.title = `Buffalo Bills — ${dateStr} | Bills History Daily`;
+    }
 
     // Cleanup when leaving page
     return () => {
